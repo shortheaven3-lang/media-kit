@@ -57,9 +57,21 @@ class KeinTreffer(RuntimeError):
     pass
 
 
+# Wikimedia verlangt in seiner Richtlinie fuer Zugriffe ohne Anmeldung einen
+# User-Agent, der das Programm nennt und eine Kontaktmoeglichkeit angibt, und
+# beantwortet generische Kennungen mit 403. Dieselbe Kennung schadet bei den
+# anderen Anbietern nicht, also gilt sie ueberall.
+KENNUNG = ("media-kit/1.0 (https://github.com/shortheaven3-lang/media-kit; "
+           "Medienerzeugung fuer eigene Social-Media-Konten)")
+
+# Was beim letzten Abruf schiefging, je Anbieter. Ohne das sieht ein
+# abgewiesener Zugriff genauso aus wie ein Suchwort ohne Treffer.
+letzter_fehler: dict[str, str] = {}
+
+
 def _json_holen(url: str, kopfzeilen: dict | None = None, zeit: int = 30) -> dict:
     anfrage = urllib.request.Request(
-        url, headers={"User-Agent": "media-kit/1.0", **(kopfzeilen or {})}
+        url, headers={"User-Agent": KENNUNG, **(kopfzeilen or {})}
     )
     with urllib.request.urlopen(anfrage, timeout=zeit) as antwort:
         return json.loads(antwort.read().decode("utf-8"))
@@ -69,6 +81,7 @@ def _json_holen(url: str, kopfzeilen: dict | None = None, zeit: int = 30) -> dic
 def pexels(begriff: str, anzahl: int = 5, quer: bool = False) -> list[Treffer]:
     schluessel = os.environ.get("PEXELS_API_KEY")
     if not schluessel:
+        letzter_fehler["pexels"] = "kein PEXELS_API_KEY gesetzt"
         return []
     url = ("https://api.pexels.com/v1/search?"
            + urllib.parse.urlencode({
@@ -77,7 +90,8 @@ def pexels(begriff: str, anzahl: int = 5, quer: bool = False) -> list[Treffer]:
            }))
     try:
         daten = _json_holen(url, {"Authorization": schluessel})
-    except Exception:
+    except Exception as fehler:
+        letzter_fehler["pexels"] = f"{type(fehler).__name__}: {fehler}"
         return []
     treffer = []
     for foto in daten.get("photos", []):
@@ -122,7 +136,8 @@ def wikimedia(begriff: str, anzahl: int = 5, quer: bool = False) -> list[Treffer
              }))
     try:
         daten = _json_holen(suche)
-    except Exception:
+    except Exception as fehler:
+        letzter_fehler["wikimedia"] = f"{type(fehler).__name__}: {fehler}"
         return []
 
     treffer = []
@@ -168,6 +183,7 @@ def _text_ohne_html(roh: str) -> str:
 def pixabay(begriff: str, anzahl: int = 5, quer: bool = False) -> list[Treffer]:
     schluessel = os.environ.get("PIXABAY_API_KEY")
     if not schluessel:
+        letzter_fehler["pixabay"] = "kein PIXABAY_API_KEY gesetzt"
         return []
     url = ("https://pixabay.com/api/?"
            + urllib.parse.urlencode({
@@ -177,7 +193,8 @@ def pixabay(begriff: str, anzahl: int = 5, quer: bool = False) -> list[Treffer]:
            }))
     try:
         daten = _json_holen(url)
-    except Exception:
+    except Exception as fehler:
+        letzter_fehler["pixabay"] = f"{type(fehler).__name__}: {fehler}"
         return []
     return [
         Treffer(url=t.get("largeImageURL", ""), anbieter="pixabay",
@@ -209,6 +226,7 @@ def suchen_mit_bericht(begriff: str, anbieter: str = "", anzahl: int = 5,
         if not funktion:
             raise SystemExit(f"Unbekannter Anbieter {name!r}. "
                              f"Bekannt: {', '.join(sorted(ANBIETER))}")
+        letzter_fehler.pop(name, None)
         teil = funktion(begriff, anzahl, quer)
         bericht[name] = len(teil)
         gefunden += teil
@@ -262,11 +280,13 @@ def beschaffen(angabe: str, lager: Lager, wurzel: Path,
         if art == "motiv":
             treffer, bericht = suchen_mit_bericht(rest, anzahl=1, quer=quer)
             if not treffer:
+                teile = []
+                for name, zahl in bericht.items():
+                    grund = letzter_fehler.get(name)
+                    teile.append(f"{name}: {zahl}" + (f" ({grund})" if grund else ""))
                 raise KeinTreffer(
-                    f"kein freies Bild zu {rest!r} gefunden ("
-                    + ", ".join(f"{k}: {v}" for k, v in bericht.items())
-                    + "). Ohne PEXELS_API_KEY und PIXABAY_API_KEY bleibt nur "
-                    "Wikimedia Commons, und das braucht englische, sachliche Suchworte."
+                    f"kein freies Bild zu {rest!r} gefunden - "
+                    + "; ".join(teile)
                 )
             return lager.geholt(treffer[0].url), treffer[0]
         if art in ANBIETER:

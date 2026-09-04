@@ -1,0 +1,20 @@
+{
+  "job": "probe-bildquelle",
+  "marke": "shortheaven3",
+  "ausgaben": [
+    "story",
+    "karussell"
+  ],
+  "schriften": [
+    {
+      "familie": "EBGaramond",
+      "lizenz": "OFL-1.1",
+      "quelle": "https://raw.githubusercontent.com/google/fonts/main/ofl/ebgaramond/EBGaramond%5Bwght%5D.ttf"
+    },
+    {
+      "familie": "EBGaramondItalic",
+      "lizenz": "OFL-1.1",
+      "quelle": "https://raw.githubusercontent.com/google/fonts/main/ofl/ebgaramond/EBGaramond-Italic%5Bwght%5D.ttf"
+    }
+  ]
+}

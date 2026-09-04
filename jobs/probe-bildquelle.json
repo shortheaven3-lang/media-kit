@@ -1,0 +1,19 @@
+{
+  "id": "probe-bildquelle",
+  "marke": "shortheaven3",
+  "notiz": "Prueft den Weg ueber die freien Bildquellen von der Suche bis zum fertig eingefaerbten Hintergrund. Bewusst ueber 'motiv:' statt ueber eine feste Adresse - nur so laeuft die Suche selbst mit. Ohne PEXELS_API_KEY faellt die Kette auf Wikimedia Commons durch, das keinen Schluessel braucht.",
+  "ausgaben": ["story", "karussell"],
+  "slides": [
+    {
+      "typ": "haken",
+      "titel": "Was du nicht entscheidest, entscheidet sich trotzdem.",
+      "motiv": "fog forest morning landscape"
+    },
+    {
+      "typ": "ende",
+      "merksatz": "Nur ohne dich.",
+      "motiv": "calm sea horizon dusk"
+    }
+  ],
+  "caption": "Probelauf der Bildquellen."
+}

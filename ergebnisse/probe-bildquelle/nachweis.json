@@ -16,5 +16,47 @@
       "lizenz": "OFL-1.1",
       "quelle": "https://raw.githubusercontent.com/google/fonts/main/ofl/ebgaramond/EBGaramond-Italic%5Bwght%5D.ttf"
     }
+  ],
+  "bilder": [
+    {
+      "format": "story",
+      "slide": 1,
+      "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/a/a8/Morning_fog_over_Keravanjoki_river_in_Vantaa%2C_Finland%2C_2021_October.jpg/1280px-Morning_fog_over_Keravanjoki_river_in_Vantaa%2C_Finland%2C_2021_October.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+      "anbieter": "wikimedia",
+      "urheber": "Ximonic (Simo Räsänen)",
+      "lizenz": "CC BY 3.0",
+      "fundstelle": "https://commons.wikimedia.org/wiki/File:Morning_fog_over_Keravanjoki_river_in_Vantaa,_Finland,_2021_October.jpg",
+      "kennung": "File:Morning fog over Keravanjoki river in Vantaa, Finland, 2021 October.jpg"
+    },
+    {
+      "format": "story",
+      "slide": 2,
+      "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/e/e8/Sea_Shore_of_evening_cloud_kisses_the_sea.jpg/1280px-Sea_Shore_of_evening_cloud_kisses_the_sea.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+      "anbieter": "wikimedia",
+      "urheber": "Mathanprasath K",
+      "lizenz": "CC BY 4.0",
+      "fundstelle": "https://commons.wikimedia.org/wiki/File:Sea_Shore_of_evening_cloud_kisses_the_sea.jpg",
+      "kennung": "File:Sea Shore of evening cloud kisses the sea.jpg"
+    },
+    {
+      "format": "karussell",
+      "slide": 1,
+      "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/a/a8/Morning_fog_over_Keravanjoki_river_in_Vantaa%2C_Finland%2C_2021_October.jpg/1280px-Morning_fog_over_Keravanjoki_river_in_Vantaa%2C_Finland%2C_2021_October.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+      "anbieter": "wikimedia",
+      "urheber": "Ximonic (Simo Räsänen)",
+      "lizenz": "CC BY 3.0",
+      "fundstelle": "https://commons.wikimedia.org/wiki/File:Morning_fog_over_Keravanjoki_river_in_Vantaa,_Finland,_2021_October.jpg",
+      "kennung": "File:Morning fog over Keravanjoki river in Vantaa, Finland, 2021 October.jpg"
+    },
+    {
+      "format": "karussell",
+      "slide": 2,
+      "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/e/e8/Sea_Shore_of_evening_cloud_kisses_the_sea.jpg/1280px-Sea_Shore_of_evening_cloud_kisses_the_sea.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+      "anbieter": "wikimedia",
+      "urheber": "Mathanprasath K",
+      "lizenz": "CC BY 4.0",
+      "fundstelle": "https://commons.wikimedia.org/wiki/File:Sea_Shore_of_evening_cloud_kisses_the_sea.jpg",
+      "kennung": "File:Sea Shore of evening cloud kisses the sea.jpg"
+    }
   ]
 }

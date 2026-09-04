@@ -103,13 +103,22 @@ def wikimedia(begriff: str, anzahl: int = 5, quer: bool = False) -> list[Treffer
     einem, dafuer kommen Urheber und Lizenz gleich mit - und ohne die waere der
     Treffer wertlos, weil Commons eben nicht durchgehend frei ist.
     """
+    # Der Korb muss deutlich groesser sein als die gewuenschte Zahl: danach
+    # faellt alles mit NC oder ND heraus, und die Sortierung nach Ausrichtung
+    # kommt noch dazu. Mit gsrlimit=anzahl*2 blieb regelmaessig nichts uebrig.
+    #
+    # 1280 statt 2000 als Thumbnailbreite ist kein Qualitaetsverzicht, sondern
+    # eine Zeitfrage: Commons haelt die gaengigen Breiten vorgerechnet bereit
+    # und erzeugt krumme Werte erst auf Anfrage. Bei grossen Originalen dauert
+    # das zehn Sekunden und mehr - pro Bild. Der Hintergrund wird ohnehin
+    # weichgezeichnet und abgedunkelt.
     suche = ("https://commons.wikimedia.org/w/api.php?"
              + urllib.parse.urlencode({
                  "action": "query", "format": "json", "generator": "search",
                  "gsrnamespace": "6", "gsrsearch": f"filetype:bitmap {begriff}",
-                 "gsrlimit": max(1, min(anzahl * 2, 30)),
+                 "gsrlimit": max(10, min(anzahl * 8, 50)),
                  "prop": "imageinfo", "iiprop": "url|extmetadata|size",
-                 "iiurlwidth": "2000",
+                 "iiurlwidth": "1280",
              }))
     try:
         daten = _json_holen(suche)
@@ -122,25 +131,32 @@ def wikimedia(begriff: str, anzahl: int = 5, quer: bool = False) -> list[Treffer
         breite, hoehe = infos.get("width", 0), infos.get("height", 0)
         if not breite or not hoehe:
             continue
-        # Hochformat fuer Reel und Karussell, Querformat fuer Titelbilder.
-        if quer and breite < hoehe:
-            continue
-        if not quer and hoehe < breite * 0.9:
-            continue
         meta = infos.get("extmetadata", {}) or {}
         lizenz = (meta.get("LicenseShortName", {}) or {}).get("value", "")
         # Alles mit NC oder ND fliegt raus - die Konten haben Umsatzabsicht.
         if any(zeichen in lizenz.upper() for zeichen in ("NC", "ND")):
             continue
-        treffer.append(Treffer(
+        treffer.append((_abstand(breite, hoehe, quer), Treffer(
             url=infos.get("thumburl") or infos.get("url", ""),
             anbieter="wikimedia",
             urheber=_text_ohne_html((meta.get("Artist", {}) or {}).get("value", "")),
             lizenz=lizenz or "siehe Fundstelle",
             fundstelle=infos.get("descriptionurl", ""),
             kennung=seite.get("title", ""),
-        ))
-    return [t for t in treffer if t.url][:anzahl]
+        )))
+
+    # Nach Ausrichtung sortiert, nicht danach gefiltert. Commons ist ueberwiegend
+    # Querformat; wer Hochformat erzwingt, bekommt fuer die meisten Suchworte gar
+    # nichts. Ein liegendes Foto laesst sich mittig beschneiden - fuer einen
+    # weichgezeichneten Stimmungshintergrund reicht das allemal.
+    treffer.sort(key=lambda paar: paar[0])
+    return [t for _, t in treffer if t.url][:anzahl]
+
+
+def _abstand(breite: int, hoehe: int, quer: bool) -> float:
+    """Wie weit ein Bild vom gewuenschten Seitenverhaeltnis entfernt ist."""
+    ziel = 16 / 9 if quer else 9 / 16
+    return abs((breite / hoehe) - ziel)
 
 
 def _text_ohne_html(roh: str) -> str:
@@ -176,6 +192,31 @@ ANBIETER = {"pexels": pexels, "wikimedia": wikimedia, "pixabay": pixabay}
 REIHENFOLGE = ("pexels", "pixabay", "wikimedia")
 
 
+def suchen_mit_bericht(begriff: str, anbieter: str = "", anzahl: int = 5,
+                       quer: bool = False) -> tuple[list[Treffer], dict[str, int]]:
+    """Wie `suchen`, liefert aber zusaetzlich, was jeder Anbieter beigetragen hat.
+
+    Der Bericht ist kein Beiwerk. Findet die Kette nichts, sieht man ohne ihn
+    nur ein Bild, das fehlt - und nicht, ob ein Schluessel fehlt, ein Anbieter
+    schweigt oder das Suchwort einfach nichts hergibt. Genau dieser Fall ist
+    hier schon einmal unbemerkt durchgelaufen.
+    """
+    liste = [anbieter] if anbieter else list(REIHENFOLGE)
+    gefunden: list[Treffer] = []
+    bericht: dict[str, int] = {}
+    for name in liste:
+        funktion = ANBIETER.get(name)
+        if not funktion:
+            raise SystemExit(f"Unbekannter Anbieter {name!r}. "
+                             f"Bekannt: {', '.join(sorted(ANBIETER))}")
+        teil = funktion(begriff, anzahl, quer)
+        bericht[name] = len(teil)
+        gefunden += teil
+        if len(gefunden) >= anzahl:
+            break
+    return gefunden[:anzahl], bericht
+
+
 def suchen(begriff: str, anbieter: str = "", anzahl: int = 5,
            quer: bool = False) -> list[Treffer]:
     """Sucht bei einem Anbieter oder der Reihe nach bei allen.
@@ -183,17 +224,7 @@ def suchen(begriff: str, anbieter: str = "", anzahl: int = 5,
     Ohne Angabe wird Pexels zuerst gefragt (beste Treffer fuer Stimmungsbilder)
     und Wikimedia zuletzt (braucht keinen Schluessel und antwortet immer).
     """
-    liste = [anbieter] if anbieter else list(REIHENFOLGE)
-    gefunden: list[Treffer] = []
-    for name in liste:
-        funktion = ANBIETER.get(name)
-        if not funktion:
-            raise SystemExit(f"Unbekannter Anbieter {name!r}. "
-                             f"Bekannt: {', '.join(sorted(ANBIETER))}")
-        gefunden += funktion(begriff, anzahl, quer)
-        if len(gefunden) >= anzahl:
-            break
-    return gefunden[:anzahl]
+    return suchen_mit_bericht(begriff, anbieter, anzahl, quer)[0]
 
 
 # -------------------------------------------------------------------- Holen
@@ -229,9 +260,14 @@ def beschaffen(angabe: str, lager: Lager, wurzel: Path,
         art, rest = angabe.split(":", 1)
         rest = rest.strip()
         if art == "motiv":
-            treffer = suchen(rest, anzahl=1, quer=quer)
+            treffer, bericht = suchen_mit_bericht(rest, anzahl=1, quer=quer)
             if not treffer:
-                return None, None
+                raise KeinTreffer(
+                    f"kein freies Bild zu {rest!r} gefunden ("
+                    + ", ".join(f"{k}: {v}" for k, v in bericht.items())
+                    + "). Ohne PEXELS_API_KEY und PIXABAY_API_KEY bleibt nur "
+                    "Wikimedia Commons, und das braucht englische, sachliche Suchworte."
+                )
             return lager.geholt(treffer[0].url), treffer[0]
         if art in ANBIETER:
             # Ein benannter Treffer: ueber die Suche nach der Kennung finden.

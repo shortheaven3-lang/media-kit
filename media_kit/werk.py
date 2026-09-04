@@ -66,27 +66,42 @@ def _stempel_fuer(job: Job, nummer: int) -> str:
     return job.rubrik.upper() if job.rubrik.lower() in ("widerlegt", "belegt", "neu") else ""
 
 
-def _hintergruende(job: Job, m: Marke, lager: Lager,
-                   breite: int, hoehe: int) -> tuple[list[Path | None], list[dict]]:
-    """Je Slide ein aufbereitetes Hintergrundbild - oder None.
+def _quellbilder(job: Job, lager: Lager, quer: bool,
+                 merker: dict) -> list[tuple[Path | None, object]]:
+    """Beschafft je Slide die Bildquelle - einmal, nicht einmal je Format.
 
-    Faellt ein Abruf aus, gibt es None und die Slide bekommt das Farbfeld der
+    Suche und Abruf haengen nicht vom Zielformat ab, nur der Zuschnitt tut das.
+    Eine fruehere Fassung rief `beschaffen` in jeder Formatschleife erneut auf
+    und suchte damit bei einem Beitrag in vier Formaten viermal dasselbe Bild.
+
+    Faellt ein Abruf aus, steht dort None und die Slide bekommt das Farbfeld der
     Vorlage. Der Lauf bricht nie ab, nur weil eine Bilddatenbank gerade nicht
     antwortet: ein Beitrag ohne Foto ist besser als kein Beitrag.
     """
-    bilder: list[Path | None] = []
-    nachweise: list[dict] = []
+    ergebnis = []
     for nummer, slide in enumerate(job.slides, start=1):
         angabe = slide.get("bild") or (f"motiv:{slide['motiv']}" if slide.get("motiv") else "")
         if not angabe:
-            bilder.append(None)
+            ergebnis.append((None, None))
             continue
-        try:
-            quelle, treffer = quellen.beschaffen(angabe, lager, WURZEL, quer=breite > hoehe)
-        except Exception as fehler:
-            print(f"  Slide {nummer}: Hintergrund faellt aus ({fehler})")
-            bilder.append(None)
-            continue
+        marke_ = (angabe, quer)
+        if marke_ not in merker:
+            try:
+                merker[marke_] = quellen.beschaffen(angabe, lager, WURZEL, quer=quer)
+            except Exception as fehler:
+                print(f"  Slide {nummer}: Hintergrund faellt aus - {fehler}")
+                merker[marke_] = (None, None)
+        ergebnis.append(merker[marke_])
+    return ergebnis
+
+
+def _hintergruende(job: Job, m: Marke, lager: Lager, breite: int, hoehe: int,
+                   merker: dict) -> tuple[list[Path | None], list[dict]]:
+    """Je Slide ein auf dieses Format zugeschnittenes Hintergrundbild - oder None."""
+    bilder: list[Path | None] = []
+    nachweise: list[dict] = []
+    for nummer, (quelle, treffer) in enumerate(
+            _quellbilder(job, lager, breite > hoehe, merker), start=1):
         if quelle is None:
             bilder.append(None)
             continue
@@ -128,11 +143,14 @@ def rendern(job: Job, *, ziel: Path, lager: Lager | None = None,
     standzeiten = ton.standzeiten(clips, job.anzahl_slides, job.slidedauer())
 
     alle_nachweise: list[dict] = []
+    # Merker fuer schon beschaffte Bildquellen, ueber alle Formate hinweg.
+    beschafft: dict = {}
 
     with bild.Kamera(arbeit, pruef_familien) as kamera:
         for name in gewuenscht:
             f = formate.hole(name)
-            hintergruende, nachweise = _hintergruende(job, m, lager, f.breite, f.hoehe)
+            hintergruende, nachweise = _hintergruende(job, m, lager, f.breite,
+                                                      f.hoehe, beschafft)
             alle_nachweise += [{"format": name, **n} for n in nachweise]
             ordner = ziel / name
             ordner.mkdir(parents=True, exist_ok=True)

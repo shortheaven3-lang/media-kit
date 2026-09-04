@@ -24,6 +24,7 @@ on:
 
 permissions:
   contents: write
+  issues: write
 
 concurrency:
   # Zwei gleichzeitige Laeufe wuerden beide ergebnisse/ zurueckschreiben und
@@ -83,16 +84,38 @@ jobs:
           python3 -m media_kit.cli rendern $argumente
 
       - name: Ergebnis committen
+        env:
+          ZWEIG: ${{ github.ref_name }}
         run: |
           git config user.name 'media-kit-bot'
           git config user.email 'actions@github.com'
           git add ergebnisse
           if git diff --cached --quiet; then
             echo "Nichts geaendert - alle Ergebnisse waren schon aktuell."
-          else
-            git commit -m 'Medien gerendert'
-            git push
+            exit 0
           fi
+          git commit -m 'Medien gerendert'
+
+          # Zwischen Start des Laufs und diesem Schritt vergehen ein bis zwei
+          # Minuten. Wer in dieser Zeit etwas auf denselben Zweig pusht, laesst
+          # den Push hier auflaufen: "Updates were rejected ... (fetch first)".
+          # Genau das ist beim fuenften Lauf passiert. Der Renderlauf war
+          # fehlerfrei, nur das Ergebnis blieb liegen - und der Lauf stand rot
+          # da, ohne dass am Beitrag irgendetwas falsch gewesen waere.
+          #
+          # -X theirs bezieht sich beim Rebase auf den Commit, der neu
+          # aufgesetzt wird, also auf unsere frisch gerenderten Dateien. Das
+          # ist hier richtig herum: sie sind aus dem aktuellen Stand erzeugt.
+          for versuch in 1 2 3; do
+            if git push; then
+              exit 0
+            fi
+            echo "Push abgewiesen - hole den Stand und setze neu auf (Versuch $versuch)"
+            git pull --rebase -X theirs origin "$ZWEIG" || true
+            sleep $((versuch * 3))
+          done
+          echo "Push auch nach drei Versuchen nicht durchgekommen." >&2
+          exit 1
 
       - name: Ergebnisse auch als Artefakt
         if: always()
@@ -103,8 +126,13 @@ jobs:
           retention-days: 14
           if-no-files-found: ignore
 
+      # Die Meldung darf den Lauf nicht zusaetzlich rot faerben: sie laeuft nur,
+      # wenn ohnehin schon etwas schiefging, und ihr eigenes Scheitern (etwa
+      # weil Issues abgeschaltet sind) wuerde die eigentliche Ursache im
+      # Protokoll nach oben schieben.
       - name: Fehlschlag melden
         if: failure()
+        continue-on-error: true
         env:
           GH_TOKEN: ${{ github.token }}
         run: |

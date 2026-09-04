@@ -149,7 +149,7 @@ def wikimedia(begriff: str, anzahl: int = 5, quer: bool = False) -> list[Treffer
         meta = infos.get("extmetadata", {}) or {}
         lizenz = (meta.get("LicenseShortName", {}) or {}).get("value", "")
         # Alles mit NC oder ND fliegt raus - die Konten haben Umsatzabsicht.
-        if any(zeichen in lizenz.upper() for zeichen in ("NC", "ND")):
+        if _eingeschraenkt(lizenz):
             continue
         treffer.append((_abstand(breite, hoehe, quer), Treffer(
             url=infos.get("thumburl") or infos.get("url", ""),
@@ -172,6 +172,18 @@ def _abstand(breite: int, hoehe: int, quer: bool) -> float:
     """Wie weit ein Bild vom gewuenschten Seitenverhaeltnis entfernt ist."""
     ziel = 16 / 9 if quer else 9 / 16
     return abs((breite / hoehe) - ziel)
+
+
+# NC und ND nur als eigenstaendige Bausteine, nicht als Buchstabenfolge.
+# Ein schlichtes "NC" in lizenz.upper() trifft auch "LICENCE" - L-I-C-E-N-C-E -
+# und warf damit jede Lizenz in britischer oder franzoesischer Schreibweise
+# hinaus, obwohl sie voellig frei ist.
+_EINGESCHRAENKT = __import__("re").compile(r"(?:^|[^A-Z])(NC|ND)(?:[^A-Z]|$)")
+
+
+def _eingeschraenkt(lizenz: str) -> bool:
+    """Ob die Lizenz kommerzielle Nutzung oder Bearbeitung untersagt."""
+    return bool(_EINGESCHRAENKT.search((lizenz or "").upper()))
 
 
 def _text_ohne_html(roh: str) -> str:

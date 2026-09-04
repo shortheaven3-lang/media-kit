@@ -102,3 +102,24 @@ def test_ohne_bildklima_bleibt_das_foto_wie_es_ist(tmp_path):
         quellen.aufbereiten(quelle, tmp_path / "c.jpg", 540, 675, m.bildklima)))
     r, g, b = fertig.reshape(-1, 3).mean(0)
     assert b > 150, "die Vorlage arbeitet ohne Einfaerbung, das Blau muss bleiben"
+
+
+# ---------------------------------------------------------------- Lizenzen
+@pytest.mark.parametrize("lizenz", [
+    "CC BY-NC 4.0", "CC BY-NC-SA 3.0", "CC BY-ND 4.0", "cc by-nc-nd 2.0",
+])
+def test_nc_und_nd_werden_ausgeschlossen(lizenz):
+    """Die Konten haben Umsatzabsicht - NC und ND scheiden aus."""
+    assert quellen._eingeschraenkt(lizenz)
+
+
+@pytest.mark.parametrize("lizenz", [
+    "CC BY-SA 4.0", "CC0", "Public domain", "CC BY 3.0",
+    "Licence Ouverte",              # L-I-C-E-N-C-E enthaelt die Folge "NC"
+    "Open Government Licence v3.0",
+    "GNU Free Documentation Licence 1.2",
+])
+def test_freie_lizenzen_bleiben_drin(lizenz):
+    """Der Vorlaeufer pruefte auf die blosse Buchstabenfolge und warf damit
+    jede Lizenz in britischer oder franzoesischer Schreibweise hinaus."""
+    assert not quellen._eingeschraenkt(lizenz), lizenz

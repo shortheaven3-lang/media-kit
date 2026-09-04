@@ -16,7 +16,7 @@ from pathlib import Path
 WURZEL = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(WURZEL))
 
-from media_kit import formate, layout, marke  # noqa: E402
+from media_kit import formate, job, layout, marke  # noqa: E402
 
 
 def daten() -> dict:
@@ -32,9 +32,7 @@ def daten() -> dict:
         },
         "slide_typen": {
             typ: {"pflicht": sorted(pflicht), "erlaubt": sorted(erlaubt)}
-            for typ, (pflicht, erlaubt) in __import__(
-                "media_kit.job", fromlist=["SLIDE_TYPEN"]
-            ).SLIDE_TYPEN.items()
+            for typ, (pflicht, erlaubt) in job.SLIDE_TYPEN.items()
         },
         "marken": {
             name: {

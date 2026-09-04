@@ -27,7 +27,8 @@
       [1.0, [176, 148, 120]]
     ],
     "weichzeichnen": 3.2,
-    "abdunkeln": 0.38,
+    "abdunkeln": 0.18,
+    "_abdunkeln_warum": "Nicht mehr. Der Leseschleier der Vorlage liegt bei 0,62 Deckung; zusammen mit 0,38 Abdunkelung blieben rund 23 Prozent der Ursprungshelligkeit uebrig und vom Foto war nichts mehr zu erkennen. Ein Foto soll zuruecktreten, nicht verschwinden - sonst kann man es auch weglassen und Rechenzeit sparen.",
     "leseschleier": 0.42
   },
 

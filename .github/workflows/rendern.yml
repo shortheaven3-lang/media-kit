@@ -70,10 +70,16 @@ jobs:
           # Schluessel braucht - und Jobs ohne Foto laufen ohnehin durch.
           PEXELS_API_KEY: ${{ secrets.PEXELS_API_KEY }}
           PIXABAY_API_KEY: ${{ secrets.PIXABAY_API_KEY }}
+          # Die Eingaben gehen ueber die Umgebung in die Shell, nicht ueber
+          # ${{ }} mitten in die Befehlszeile. Sonst wuerde GitHub den Text vor
+          # dem Ausfuehren einsetzen, und wer den Lauf von Hand startet, koennte
+          # ueber das Feld beliebige Befehle unterschieben.
+          NUR: ${{ inputs.nur }}
+          NEU: ${{ inputs.neu }}
         run: |
           argumente="--alle"
-          if [ -n "${{ inputs.nur }}" ]; then argumente="$argumente --nur ${{ inputs.nur }}"; fi
-          if [ "${{ inputs.neu }}" = "true" ]; then argumente="$argumente --neu"; fi
+          if [ -n "$NUR" ]; then argumente="$argumente --nur $NUR"; fi
+          if [ "$NEU" = "true" ]; then argumente="$argumente --neu"; fi
           python3 -m media_kit.cli rendern $argumente
 
       - name: Ergebnis committen

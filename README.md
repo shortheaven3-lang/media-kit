@@ -167,6 +167,26 @@ Speichern der Bilder — für ein Repository, das sie festhält, unpassend),
 am Posting-Morgen ausgeht), **edge-tts** (undokumentierter Microsoft-Endpunkt,
 jederzeit abschaltbar).
 
+## Wenn kein Bild gefunden wird
+
+Die Meldung nennt jeden Anbieter einzeln mit Grund:
+
+```
+Slide 1: Hintergrund faellt aus - kein freies Bild zu 'fog forest' gefunden -
+  pexels: 0 (kein PEXELS_API_KEY gesetzt); pixabay: 0 (kein PIXABAY_API_KEY
+  gesetzt); wikimedia: 0 (HTTPError: 403 Forbidden)
+```
+
+Das ist mit Absicht so ausführlich. Ein fehlender Schlüssel, ein abgewiesener
+Zugriff und ein untaugliches Suchwort sehen sonst gleich aus — nämlich wie ein
+Bild, das eben fehlt. Genau das ist beim ersten Probelauf passiert: Wikimedia
+verlangt einen User-Agent, der das Programm nennt und eine Kontaktmöglichkeit
+angibt, und beantwortete die generische Kennung mit 403. Der Lauf lief
+durch, die Beiträge waren fertig, und niemand hätte gemerkt, dass jeder
+Hintergrund fehlte.
+
+Der Lauf bricht dabei nie ab. Ein Beitrag ohne Foto ist besser als kein Beitrag.
+
 ## Was in GitHub Actions passiert
 
 * **`rendern.yml`** — eine Job-Datei fällt ins Repository, die Action rendert
@@ -213,6 +233,9 @@ Geprüft wird das, was still kaputtgeht:
   Verbindlich ist, was die Action ausgibt.
 * **Die Bildersuche über `motiv:` ist blind** und trifft oft daneben. Der
   vorgesehene Weg ist, beim Redigieren eine feste Adresse unter `bild`
-  einzutragen, nachdem jemand die Treffer wirklich angesehen hat.
+  einzutragen, nachdem jemand die Treffer wirklich angesehen hat. Ohne
+  `PEXELS_API_KEY` kommen die Treffer von Wikimedia Commons, und das braucht
+  englische, sachliche Suchworte — „nebliger Waldweg“ findet dort nichts,
+  `fog forest morning` schon.
 * **Kein Zeitgeber.** Wann etwas erscheint, entscheidet weiterhin der
   Autoposter. Dieses Programm erzeugt nur die Medien.

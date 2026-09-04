@@ -1,0 +1,15 @@
+# Der Kern. Mehr braucht es fuer Bilder nicht.
+playwright>=1.44          # Browser fuer den Textsatz
+Pillow>=10.0              # Zuschneiden und Einfaerben der Hintergrundbilder
+numpy>=1.24               # Tonspur
+
+# Video. In GitHub Actions ist ffmpeg vorinstalliert; lokal springt das
+# statische Binary aus diesem Paket ein, damit niemand sudo braucht.
+imageio-ffmpeg>=0.4.9
+
+# Ausdruecklich NICHT dabei:
+#   scipy       - brachte 40 MB fuer vier Filteraufrufe mit. Die sind in
+#                 ton.py mit numpy ueber die FFT nachgebaut.
+#   piper-tts   - nur fuer die Sprachausgabe noetig und zieht onnxruntime
+#                 (~200 MB) nach. Steht deshalb in requirements-stimme.txt.
+#                 Ohne Piper laeuft alles weiter, die Reels bleiben nur stumm.

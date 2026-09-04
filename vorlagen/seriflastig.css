@@ -1,0 +1,81 @@
+/* Vorlage "seriflastig" - dunkler Grund, Kupfer, Antiqua. Fuer @shortheaven3.
+   Wenig Text, viel Luft, mittig gesetzt. Ein Satz je Slide, damit er im
+   Vorbeiscrollen lesbar bleibt. Das Foto traegt Stimmung und tritt hinter den
+   Leseschleier zurueck; es soll nicht mit der Schrift um Aufmerksamkeit
+   streiten. */
+
+:root {
+  --rand-oben: 7rem;
+  --rand-seite: 7.5rem;
+  --rand-unten: 7rem;
+}
+
+body { background: var(--grund); color: var(--schrift); }
+
+/* Faellt kein Foto an, bleibt ein sehr flacher Verlauf statt einer toten
+   Flaeche - auf dem Handy sieht reines Einfarbig nach Ladefehler aus. */
+.grund {
+  background-image:
+    radial-gradient(120% 90% at 50% 12%, rgba(158,130,106,.10), transparent 62%),
+    radial-gradient(90% 70% at 50% 100%, rgba(0,0,0,.35), transparent 60%);
+}
+
+.schleier { background: var(--schleier); }
+
+.zaehler { color: var(--gedaempft); }
+
+mark { color: var(--schrift); border-bottom: 2px solid rgba(158,130,106,.5); }
+
+/* Alle Textslides mittig. Die Marke lebt von der Leere um den Satz herum. */
+.blatt { justify-content: center; align-items: center; text-align: center; }
+
+.typ-haken h1,
+.typ-ende .merksatz {
+  font-family: var(--schrift-titel), serif; font-weight: 500;
+  font-size: 4.125rem; line-height: 1.26; letter-spacing: -.006em;
+  max-width: 46rem;
+}
+.typ-haken .unterzeile {
+  margin-top: 3rem; font-size: 2rem; line-height: 1.5;
+  font-style: italic; color: var(--gedaempft); max-width: 38rem;
+}
+
+.kopf {
+  font-family: var(--schrift-titel), serif; font-style: italic; font-weight: 400;
+  font-size: 1.75rem; line-height: 1.4; letter-spacing: .16em;
+  text-transform: uppercase; color: var(--gedaempft);
+  margin-bottom: 2.5rem;
+}
+
+.fliess {
+  font-size: 3rem; line-height: 1.42; max-width: 46rem;
+}
+.fliess p + p { margin-top: 2.2rem; }
+
+.typ-zitat .fliess { font-style: italic; font-size: 3.25rem; }
+.typ-zitat .herkunft {
+  margin-top: 2.75rem; font-size: 1.625rem; letter-spacing: .12em;
+  text-transform: uppercase; color: var(--gedaempft);
+}
+
+.typ-frage .fliess { font-style: italic; }
+
+.quelle {
+  margin-top: 3rem; padding-top: 1.75rem;
+  border-top: 1px solid var(--linie);
+  font-size: 1.5rem; letter-spacing: .06em; color: var(--gedaempft);
+}
+
+.typ-ende .abbinder {
+  margin-top: 3.25rem; font-size: 1.875rem; letter-spacing: .1em;
+  color: var(--gedaempft);
+}
+.typ-ende .abbinder span { color: var(--schrift); }
+
+.stempel { display: none; }   /* die Marke kennt keine Rubrikstempel */
+
+/* --------------------------------------------------------- Querformate */
+.quer .fliess, .quer .quelle, .quer .zaehler { display: none; }
+.quer .kopf { font-size: 1.375rem; margin-bottom: 1.5rem; }
+.quer .typ-haken h1, .quer h1, .quer .merksatz { font-size: 3.5rem; max-width: 90%; }
+.quer .unterzeile, .quer .abbinder { margin-top: 1.5rem; font-size: 1.625rem; }

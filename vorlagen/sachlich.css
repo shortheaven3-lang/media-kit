@@ -1,0 +1,106 @@
+/* Vorlage "sachlich" - helles Papier, Raster, Marker. Fuer @denkbeleg.
+   Ein Befund mit Quellenangabe wirkt auf hellem Papier glaubwuerdiger als vor
+   einem Stimmungsbild; diese Vorlage arbeitet deshalb ohne Foto. */
+
+:root {
+  --rand-oben: 6.5rem;
+  --rand-seite: 6rem;
+  --rand-unten: 5.75rem;
+}
+
+body { background: var(--papier); color: var(--tinte); }
+
+/* Randraster, nur angedeutet: es soll nach Notizpapier aussehen, nicht nach
+   Millimeterpapier. Deshalb die Maske, die es zur Mitte hin ausblendet. */
+.grund {
+  background-image:
+    linear-gradient(var(--raster) 1px, transparent 1px),
+    linear-gradient(90deg, var(--raster) 1px, transparent 1px);
+  background-size: 3.375rem 3.375rem;
+  -webkit-mask-image:
+    linear-gradient(to bottom, rgba(0,0,0,.55) 0 3%, transparent 8% 92%, rgba(0,0,0,.55) 97% 100%),
+    linear-gradient(to right, rgba(0,0,0,.55) 0 4%, transparent 10% 90%, rgba(0,0,0,.55) 96% 100%);
+  -webkit-mask-composite: source-over;
+  opacity: .9;
+}
+
+.zaehler { color: var(--quelle); font-weight: 500; }
+
+mark { background: linear-gradient(transparent 12%, var(--marker) 12% 88%, transparent 88%); }
+
+/* ------------------------------------------------------------------ Haken */
+.typ-haken .blatt { justify-content: center; align-items: center; text-align: center; }
+.typ-haken h1 {
+  font-family: var(--schrift-titel), sans-serif; font-weight: 700;
+  font-size: 4.75rem; line-height: 1.14; letter-spacing: -.022em;
+  max-width: 51.25rem;
+}
+.typ-haken .unterzeile {
+  margin-top: 3.5rem; font-size: 2.0625rem; line-height: 1.45;
+  font-style: italic; color: var(--neben); max-width: 43.75rem;
+}
+
+/* ----------------------------------------------------------------- Inhalt */
+.kopf {
+  font-family: var(--schrift-titel), sans-serif; font-weight: 700;
+  font-size: 3.375rem; line-height: 1.16; letter-spacing: -.018em;
+  margin-bottom: 2.75rem; max-width: 55rem;
+}
+.fliess { font-size: 2.1875rem; line-height: 1.5; max-width: 55.625rem; }
+.fliess p + p { margin-top: 1.875rem; }
+
+.quelle {
+  margin-top: auto; padding-top: 2.375rem;
+  border-top: 1px solid rgba(22,25,29,.16);
+  font-family: var(--schrift-technisch), monospace;
+  font-size: 1.375rem; letter-spacing: .01em; color: var(--quelle);
+}
+
+/* ------------------------------------------------------------------ Zitat */
+.typ-zitat .blatt { justify-content: center; }
+.typ-zitat .fliess {
+  font-size: 3.125rem; line-height: 1.34; font-style: italic; max-width: 52rem;
+}
+.typ-zitat .herkunft {
+  margin-top: 3rem; font-family: var(--schrift-technisch), monospace;
+  font-size: 1.5rem; color: var(--quelle);
+}
+
+/* ------------------------------------------------------------------ Frage */
+.typ-frage .blatt { justify-content: center; }
+.typ-frage .fliess { font-size: 3.375rem; line-height: 1.28; max-width: 52rem; }
+
+/* -------------------------------------------------------------- Abschluss */
+.typ-ende .blatt { justify-content: flex-end; padding-bottom: calc(var(--sicher-unten) + 9.375rem); }
+.typ-ende .merksatz {
+  font-family: var(--schrift-titel), sans-serif; font-weight: 700;
+  font-size: 3.625rem; line-height: 1.2; letter-spacing: -.018em; max-width: 50rem;
+}
+.typ-ende .abbinder {
+  margin-top: 4rem; font-size: 2rem; line-height: 1.45;
+  color: var(--neben); max-width: 45rem;
+}
+.typ-ende .abbinder span { font-weight: 600; color: var(--tinte); }
+
+/* ---------------------------------------------------------------- Stempel */
+.stempel {
+  position: absolute; z-index: 4;
+  top: calc(var(--sicher-oben) + 9.375rem); right: 3.25rem;
+  transform: rotate(9deg);
+  border: 5px solid var(--stempel); border-radius: .625rem;
+  padding: .75rem 1.625rem .875rem;
+  font-family: var(--schrift-titel), sans-serif; font-weight: 800;
+  font-size: 2.625rem; letter-spacing: .09em; color: var(--stempel);
+  opacity: .86;
+}
+
+/* ------------------------------------------------ Querformate (OG, Titel)
+   Ein Vorschaubild ist kein Slide. Es hat einen Satz Zeit, nicht sieben, und
+   wird oft auf Handybreite verkleinert - also groesser setzen und weniger
+   zeigen. Fliesstext und Quellenzeile fallen hier weg. */
+.quer .blatt { justify-content: center; }
+.quer .fliess, .quer .quelle, .quer .zaehler, .quer .stempel { display: none; }
+.quer .kopf, .quer h1, .quer .merksatz {
+  font-size: 4rem; line-height: 1.16; max-width: 100%; margin-bottom: 0;
+}
+.quer .unterzeile, .quer .abbinder { margin-top: 2rem; font-size: 1.75rem; }

@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>media-kit</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400..700&family=Inter:wght@400..700&family=JetBrains+Mono:wght@400..600&family=EB+Garamond:ital,wght@0,400..600;1,400..500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="oberflaeche.css">
+</head>
+<body>
+
+<header>
+  <h1>media-kit</h1>
+  <p class="unterzeile">
+    Ein Beitrag, alle Formate. Die Seite baut die Job-Datei &mdash; gerendert wird
+    in GitHub Actions, damit hier kein Server laufen muss.
+  </p>
+</header>
+
+<main>
+  <section class="spalte editor">
+    <div class="reihe">
+      <label>Marke
+        <select id="marke"></select>
+      </label>
+      <label>Kennung
+        <input id="kennung" type="text" placeholder="2026-09-20-testeffekt" spellcheck="false">
+      </label>
+    </div>
+
+    <div class="reihe">
+      <label>Rubrik <small>(leer lassen, wenn ohne Stempel)</small>
+        <input id="rubrik" type="text" placeholder="widerlegt" spellcheck="false">
+      </label>
+      <label>Termin
+        <input id="termin" type="datetime-local">
+      </label>
+    </div>
+
+    <fieldset>
+      <legend>Ausgaben</legend>
+      <div id="ausgaben" class="haken"></div>
+    </fieldset>
+
+    <fieldset>
+      <legend>Slides</legend>
+      <div id="slides"></div>
+      <button type="button" id="slide-dazu" class="leise">Slide anhängen</button>
+    </fieldset>
+
+    <label>Bildunterschrift
+      <textarea id="caption" rows="5" placeholder="Was unter dem Beitrag steht."></textarea>
+    </label>
+
+    <fieldset>
+      <legend>Job-Datei</legend>
+      <textarea id="ausgabe" rows="10" spellcheck="false" readonly></textarea>
+      <div class="knopfreihe">
+        <button type="button" id="kopieren">In die Zwischenablage</button>
+        <a id="anlegen" class="knopf" target="_blank" rel="noopener">In GitHub anlegen</a>
+      </div>
+      <p id="hinweis" class="hinweis"></p>
+    </fieldset>
+  </section>
+
+  <section class="spalte vorschau">
+    <div class="reihe">
+      <label>Format
+        <select id="format"></select>
+      </label>
+      <label>Slide
+        <select id="welche"></select>
+      </label>
+    </div>
+    <div class="buehne"><iframe id="rahmen" title="Vorschau"></iframe></div>
+    <p class="hinweis">
+      Die Vorschau baut dieselben Stilvorlagen ein wie der Renderlauf, setzt den
+      Text aber im Browser deiner Maschine. Kleine Abweichungen im Umbruch sind
+      möglich; verbindlich ist, was die Action ausgibt.
+    </p>
+  </section>
+</main>
+
+<script src="oberflaeche.js"></script>
+</body>
+</html>

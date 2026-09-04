@@ -1,0 +1,30 @@
+name: Pruefung
+
+on:
+  push:
+    paths: ['media_kit/**', 'tests/**', 'vorlagen/**', 'marken/**', '.github/workflows/pruefung.yml']
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+
+      # Die Tests brauchen keinen Browser: sie pruefen Schema, Filtergraph,
+      # Tonspur, Zwischenlager und den Seitenaufbau als Text. Nur der eine
+      # Test, der die Videolaenge gegen echtes ffmpeg misst, braucht ffmpeg -
+      # und das ist auf ubuntu-latest vorhanden.
+      - name: Pakete installieren
+        run: pip install --quiet numpy Pillow imageio-ffmpeg -r requirements-pruefung.txt
+
+      - name: Tests
+        run: python3 -m pytest -q
+
+      - name: Beispieljobs pruefen
+        run: python3 -m media_kit.cli pruefen --alle

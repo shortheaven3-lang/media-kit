@@ -1,0 +1,31 @@
+{
+  "id": "beispiel-denkbeleg",
+  "marke": "denkbeleg",
+  "rubrik": "widerlegt",
+  "termin": "2026-09-20T06:30:00+02:00",
+  "ausgaben": ["karussell", "og"],
+  "slides": [
+    {
+      "typ": "haken",
+      "titel": "Die <mark>21 Tage</mark>, nach denen eine Gewohnheit angeblich sitzt, hat nie jemand gemessen.",
+      "unterzeile": "Sie stammen von einem Schönheitschirurgen."
+    },
+    {
+      "typ": "inhalt",
+      "kopf": "Woher die Zahl wirklich kommt",
+      "text": "1960 veröffentlicht der plastische Chirurg <b>Maxwell Maltz</b> ein Buch über Selbstbild und Verhalten. Darin eine Beobachtung aus seiner Praxis: Patienten brauchten nach einer Operation etwa drei Wochen, bis ihnen das neue Gesicht vertraut vorkam.\n\nMaltz schrieb <b>mindestens</b> 21 Tage. Aus dem Mindestens wurde ein Genau.",
+      "quelle": "Maltz 1960 · Praxisbeobachtung, kein Experiment"
+    },
+    {
+      "typ": "inhalt",
+      "kopf": "Was passiert, wenn man es misst",
+      "text": "2010 hat <b>Phillippa Lally</b> am University College London genau das getan. 96 Menschen, zwölf Wochen lang, tägliches Protokoll.\n\nDer Median lag bei <b>66 Tagen</b>. Die Spannweite reichte von <b>18 bis 254 Tagen</b>.",
+      "quelle": "Lally et al. 2010 · n = 96 · Median 66 · Spanne 18–254"
+    },
+    {
+      "typ": "ende",
+      "merksatz": "Nicht 21. Nicht 66. Deine Zahl steht in keinem Buch."
+    }
+  ],
+  "caption": "Drei Wochen durchhalten, dann läuft es von allein. Der Satz steht in jedem Ratgeber. Nachgeschlagen hat ihn fast niemand.\n\nWelche Zahl hast du selbst schon einmal für gesichert gehalten?"
+}

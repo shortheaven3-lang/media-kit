@@ -1,0 +1,9 @@
+.zwischenlager/
+__pycache__/
+*.pyc
+.pytest_cache/
+.venv/
+_site/
+
+# ergebnisse/ wird ausdruecklich mitcommittet: Instagram holt die Bilder ueber
+# raw.githubusercontent.com ab, und dafuer muessen sie im Repository liegen.

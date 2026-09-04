@@ -1,0 +1,18 @@
+{
+  "id": "beispiel-shortheaven3",
+  "marke": "shortheaven3",
+  "termin": "2026-09-21T05:30:00+02:00",
+  "ausgaben": ["reel", "karussell"],
+  "slides": [
+    {"typ": "haken", "titel": "Du bist nicht müde. Du bist unentschieden.",
+     "sprich": "Du bist nicht müde. Du bist unentschieden."},
+    {"typ": "inhalt", "kopf": "Die Stille",
+     "text": "Wer alles offen lässt, trägt alles gleichzeitig."},
+    {"typ": "inhalt", "kopf": "Die Frage",
+     "text": "Welche Entscheidung schiebst du seit Wochen vor dir her?"},
+    {"typ": "ende", "merksatz": "Entscheide schlecht, aber entscheide."}
+  ],
+  "caption": "Unentschiedenheit kostet mehr Kraft als jede Entscheidung.",
+  "ton": {"stimme": true, "musik": true, "stimmung": "Die Stille"},
+  "video": {"slidedauer": 4.0}
+}

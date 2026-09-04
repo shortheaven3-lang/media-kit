@@ -1,0 +1,28 @@
+[project]
+name = "media-kit"
+version = "1.0.0"
+description = "Medien fuer Social Media aus einer Job-Datei: Reels, Karussells, Story-Bilder, Web-Vorschauen."
+requires-python = ">=3.11"
+dependencies = [
+    "playwright>=1.44",
+    "Pillow>=10.0",
+    "numpy>=1.24",
+    "imageio-ffmpeg>=0.4.9",
+]
+
+[project.optional-dependencies]
+stimme = ["piper-tts>=1.2"]
+pruefung = ["pytest>=8.0"]
+
+[project.scripts]
+media-kit = "media_kit.cli:haupt"
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+packages = ["media_kit"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

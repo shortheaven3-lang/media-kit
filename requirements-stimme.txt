@@ -1,0 +1,7 @@
+# Nur fuer die Sprachausgabe. Getrennt gehalten, weil onnxruntime rund 200 MB
+# mitbringt - wer nur Karussells rendert, soll das nicht installieren muessen.
+#
+# Das Sprachmodell de_DE-thorsten-medium stammt aus dem Thorsten-Voice-Datensatz
+# und steht unter CC0; der Sprecher hat seine Stimme ausdruecklich freigegeben.
+# Piper selbst ist MIT-lizenziert.
+piper-tts>=1.2

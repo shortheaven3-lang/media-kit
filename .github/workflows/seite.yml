@@ -1,0 +1,53 @@
+name: Oberflaeche veroeffentlichen
+
+# Die Oberflaeche ist eine reine Datei-Sammlung: kein Server, kein Zugangstoken,
+# keine laufenden Kosten. Sie baut die Job-Datei und uebergibt sie an GitHubs
+# eigenen Dateieditor - angemeldet ist man dort ohnehin.
+on:
+  push:
+    branches: [main]
+    paths: ['web/**', 'vorlagen/**', 'marken/**', 'media_kit/formate.py',
+            'media_kit/layout.py', '.github/workflows/seite.yml']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  bauen:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Seite zusammenstellen
+        run: |
+          mkdir -p _site/vorlagen
+          cp web/index.html _site/index.html
+          cp web/oberflaeche.css web/oberflaeche.js _site/
+          cp vorlagen/*.css _site/vorlagen/
+          # Formatmasse, Sicherheitszonen und Marken kommen aus den
+          # Python-Quellen, damit Vorschau und Renderlauf nicht auseinanderlaufen.
+          python3 web/daten_erzeugen.py _site/daten.json
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+  veroeffentlichen:
+    needs: bauen
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.pages.outputs.page_url }}
+    steps:
+      - id: pages
+        uses: actions/deploy-pages@v4

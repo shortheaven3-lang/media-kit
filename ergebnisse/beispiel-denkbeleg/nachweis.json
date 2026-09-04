@@ -1,0 +1,26 @@
+{
+  "job": "beispiel-denkbeleg",
+  "marke": "denkbeleg",
+  "termin": "2026-09-20T06:30:00+02:00",
+  "ausgaben": [
+    "karussell",
+    "og"
+  ],
+  "schriften": [
+    {
+      "familie": "Archivo",
+      "lizenz": "OFL-1.1",
+      "quelle": "https://raw.githubusercontent.com/google/fonts/main/ofl/archivo/Archivo%5Bwdth,wght%5D.ttf"
+    },
+    {
+      "familie": "Inter",
+      "lizenz": "OFL-1.1",
+      "quelle": "https://raw.githubusercontent.com/google/fonts/main/ofl/inter/Inter%5Bopsz,wght%5D.ttf"
+    },
+    {
+      "familie": "JetBrainsMono",
+      "lizenz": "OFL-1.1",
+      "quelle": "https://raw.githubusercontent.com/google/fonts/main/ofl/jetbrainsmono/JetBrainsMono%5Bwght%5D.ttf"
+    }
+  ]
+}

@@ -1,0 +1,108 @@
+name: Medien rendern
+
+# Faellt eine Job-Datei ins Repository, entsteht daraus alles Weitere von
+# selbst. Dasselbe Muster wie in den bestehenden Konten-Repositories: der
+# Push ist der Ausloeser, das Ergebnis wird zurueckgeschrieben.
+on:
+  push:
+    paths:
+      - 'jobs/**.json'
+      - 'marken/**.json'
+      - 'vorlagen/**'
+      - 'media_kit/**.py'
+      - '.github/workflows/rendern.yml'
+  workflow_dispatch:
+    inputs:
+      nur:
+        description: 'Nur diese Formate rendern (Leerzeichen-getrennt, leer = alle)'
+        required: false
+        default: ''
+      neu:
+        description: 'Zwischenlager uebergehen und alles neu aufnehmen'
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+
+concurrency:
+  # Zwei gleichzeitige Laeufe wuerden beide ergebnisse/ zurueckschreiben und
+  # sich gegenseitig den Push wegnehmen.
+  group: rendern
+  cancel-in-progress: false
+
+jobs:
+  rendern:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+
+      # Das Zwischenlager traegt Schriften, Sprachmodell und schon
+      # aufgenommene Seiten von Lauf zu Lauf. Ohne das laedt jeder Lauf 2 MB
+      # Schriften und 60 MB Sprachmodell neu und nimmt jede Slide noch einmal
+      # auf. Der Schluessel enthaelt die run_id, damit jeder Lauf den Stand
+      # fortschreibt; restore-keys holt den letzten passenden.
+      - name: Zwischenlager
+        uses: actions/cache@v4
+        with:
+          path: .zwischenlager
+          key: mediakit-${{ hashFiles('marken/**','vorlagen/**','media_kit/**') }}-${{ github.run_id }}
+          restore-keys: |
+            mediakit-${{ hashFiles('marken/**','vorlagen/**','media_kit/**') }}-
+            mediakit-
+
+      - name: Pakete installieren
+        run: |
+          pip install --quiet -r requirements.txt -r requirements-stimme.txt
+          playwright install --with-deps chromium
+
+      - name: Jobs pruefen
+        run: python3 -m media_kit.cli pruefen --alle
+
+      - name: Rendern
+        env:
+          # Beide optional. Ohne sie bleibt Wikimedia Commons, das keinen
+          # Schluessel braucht - und Jobs ohne Foto laufen ohnehin durch.
+          PEXELS_API_KEY: ${{ secrets.PEXELS_API_KEY }}
+          PIXABAY_API_KEY: ${{ secrets.PIXABAY_API_KEY }}
+        run: |
+          argumente="--alle"
+          if [ -n "${{ inputs.nur }}" ]; then argumente="$argumente --nur ${{ inputs.nur }}"; fi
+          if [ "${{ inputs.neu }}" = "true" ]; then argumente="$argumente --neu"; fi
+          python3 -m media_kit.cli rendern $argumente
+
+      - name: Ergebnis committen
+        run: |
+          git config user.name 'media-kit-bot'
+          git config user.email 'actions@github.com'
+          git add ergebnisse
+          if git diff --cached --quiet; then
+            echo "Nichts geaendert - alle Ergebnisse waren schon aktuell."
+          else
+            git commit -m 'Medien gerendert'
+            git push
+          fi
+
+      - name: Ergebnisse auch als Artefakt
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: medien
+          path: ergebnisse/
+          retention-days: 14
+          if-no-files-found: ignore
+
+      - name: Fehlschlag melden
+        if: failure()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh issue create \
+            --repo "${{ github.repository }}" \
+            --title "Renderlauf fehlgeschlagen" \
+            --body "Protokoll: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"

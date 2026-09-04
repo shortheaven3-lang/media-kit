@@ -1,0 +1,37 @@
+{
+  "anzeigename": "@denkbeleg",
+  "vorlage": "sachlich",
+  "farben": {
+    "papier":  "#F5F2EC",
+    "tinte":   "#16191D",
+    "marker":  "#FFE45C",
+    "quelle":  "#6B7280",
+    "stempel": "#C2352B",
+    "raster":  "#E4DFD4",
+    "neben":   "#3C4148"
+  },
+  "schriften": {
+    "titel":     "Archivo",
+    "fliess":    "Inter",
+    "technisch": "JetBrainsMono"
+  },
+  "schriftdateien": ["Archivo", "Inter", "JetBrainsMono"],
+  "abbinder": "@denkbeleg",
+  "standardformate": ["karussell"],
+
+  "bildklima": {
+    "an": false,
+    "_warum": "Die Marke arbeitet ohne Fotos. Ein Befund mit Quellenangabe wirkt auf hellem Papier glaubwuerdiger als vor einem Stimmungsbild."
+  },
+
+  "ton": {
+    "stimme": "de_DE-thorsten-medium",
+    "stimme_lizenz": "CC0, Thorsten-Voice-Datensatz",
+    "musik": "eigen",
+    "stimmungen": {
+      "befund":    {"grund": 98.00, "stufen": [0, 2, 5, 7, 12], "glocken": 0.85, "luft": 0.30},
+      "widerlegt": {"grund": 87.31, "stufen": [0, 3, 5, 10, 12], "glocken": 0.95, "luft": 0.28}
+    },
+    "standardstimmung": "befund"
+  }
+}

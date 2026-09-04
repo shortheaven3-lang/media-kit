@@ -1,0 +1,105 @@
+/* Oberflaeche des media-kit. Bewusst schmucklos: das Werkzeug soll nicht mit
+   den Entwuerfen um Aufmerksamkeit streiten, die es zeigt. */
+
+:root {
+  --grund: #ffffff;
+  --flaeche: #f6f5f3;
+  --rand: #dedbd5;
+  --text: #1b1d21;
+  --leise: #6b7280;
+  --akzent: #1f4fd8;
+  --akzent-text: #ffffff;
+  color-scheme: light dark;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --grund: #14161a; --flaeche: #1c1f25; --rand: #2e333c;
+    --text: #e8e6e3; --leise: #9aa1ad; --akzent: #6d94ff; --akzent-text: #0d1016;
+  }
+}
+
+* { box-sizing: border-box; }
+body {
+  margin: 0; background: var(--grund); color: var(--text);
+  font: 15px/1.55 system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+
+header { padding: 28px 24px 8px; max-width: 1400px; margin: 0 auto; }
+h1 { margin: 0; font-size: 26px; letter-spacing: -.02em; }
+.unterzeile { margin: 6px 0 0; color: var(--leise); max-width: 62ch; }
+
+main {
+  display: grid; gap: 24px; padding: 20px 24px 60px;
+  max-width: 1400px; margin: 0 auto;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 420px);
+}
+@media (max-width: 980px) { main { grid-template-columns: 1fr; } }
+
+.spalte { min-width: 0; display: flex; flex-direction: column; gap: 16px; }
+.vorschau { position: sticky; top: 20px; align-self: start; }
+
+label { display: flex; flex-direction: column; gap: 5px; font-weight: 500; min-width: 0; }
+label small { font-weight: 400; color: var(--leise); }
+.reihe { display: flex; gap: 12px; flex-wrap: wrap; }
+.reihe > label { flex: 1 1 200px; }
+
+input, select, textarea, button, .knopf {
+  font: inherit; color: var(--text); background: var(--grund);
+  border: 1px solid var(--rand); border-radius: 8px; padding: 8px 10px;
+}
+textarea { resize: vertical; font-family: ui-monospace, "JetBrains Mono", monospace; font-size: 13px; }
+input:focus, select:focus, textarea:focus { outline: 2px solid var(--akzent); outline-offset: 1px; }
+
+fieldset {
+  border: 1px solid var(--rand); border-radius: 12px;
+  padding: 14px; margin: 0; background: var(--flaeche);
+  display: flex; flex-direction: column; gap: 12px; min-width: 0;
+}
+legend { padding: 0 6px; font-weight: 600; }
+
+.haken { display: flex; flex-wrap: wrap; gap: 8px 16px; }
+.haken label { flex-direction: row; align-items: center; gap: 6px; font-weight: 400; }
+.haken input { width: auto; }
+
+button, .knopf {
+  cursor: pointer; background: var(--akzent); color: var(--akzent-text);
+  border-color: transparent; font-weight: 600; text-decoration: none;
+  display: inline-flex; align-items: center; justify-content: center;
+}
+button:hover, .knopf:hover { filter: brightness(1.08); }
+button.leise { background: transparent; color: var(--text); border-color: var(--rand); font-weight: 500; }
+.knopfreihe { display: flex; gap: 10px; flex-wrap: wrap; }
+.knopf[aria-disabled="true"] { opacity: .45; pointer-events: none; }
+
+.hinweis { margin: 0; color: var(--leise); font-size: 13px; }
+.hinweis.warnung { color: #b4530a; }
+@media (prefers-color-scheme: dark) { .hinweis.warnung { color: #f0a35e; } }
+
+/* ------------------------------------------------------------ Slide-Karten */
+.slide {
+  border: 1px solid var(--rand); border-radius: 10px; padding: 12px;
+  background: var(--grund); display: flex; flex-direction: column; gap: 10px;
+}
+.slide-kopf { display: flex; gap: 10px; align-items: center; }
+.slide-kopf .nummer {
+  font-family: ui-monospace, monospace; color: var(--leise);
+  min-width: 2.4em;
+}
+.slide-kopf select { flex: 0 0 auto; }
+.slide-kopf .fuellen { flex: 1; }
+.slide-kopf button { padding: 4px 9px; font-size: 13px; }
+
+/* ---------------------------------------------------------------- Vorschau */
+.buehne {
+  border: 1px solid var(--rand); border-radius: 12px;
+  background: var(--flaeche); padding: 12px;
+  display: flex; justify-content: center; align-items: flex-start;
+  overflow: hidden;
+}
+.buehne iframe {
+  border: 0; display: block; background: #fff;
+  box-shadow: 0 2px 14px rgba(0,0,0,.18);
+  /* Ohne das staucht der Flex-Container das iframe auf die Breite der Buehne
+     und das Seitenverhaeltnis stimmt nicht mehr. */
+  flex: 0 0 auto;
+}

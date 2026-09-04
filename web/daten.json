@@ -1,0 +1,170 @@
+{
+  "_erzeugt_von": "web/daten_erzeugen.py - nicht von Hand aendern",
+  "formate": {
+    "beitrag": {
+      "breite": 1080,
+      "hoehe": 1080,
+      "art": "bild",
+      "endung": "jpg",
+      "zweck": "Einzelbild im Quadrat. Fuer Konten, die kein 4:5 fahren.",
+      "sicher": [
+        0,
+        0
+      ]
+    },
+    "karussell": {
+      "breite": 1080,
+      "hoehe": 1350,
+      "art": "slides",
+      "endung": "jpg",
+      "zweck": "Instagram-Karussell, 4:5. Der Standard fuer mehrteilige Beitraege.",
+      "sicher": [
+        0,
+        0
+      ]
+    },
+    "og": {
+      "breite": 1200,
+      "hoehe": 630,
+      "art": "bild",
+      "endung": "png",
+      "zweck": "Vorschaubild fuer Web und Messenger (Open Graph). PNG, weil Text darauf hart bleiben soll.",
+      "sicher": [
+        0,
+        0
+      ]
+    },
+    "reel": {
+      "breite": 1080,
+      "hoehe": 1920,
+      "art": "video",
+      "endung": "mp4",
+      "zweck": "Reel oder Short, 9:16 mit Ton. Die einzige Flaeche mit Reichweite ueber die Follower hinaus.",
+      "sicher": [
+        140,
+        330
+      ]
+    },
+    "story": {
+      "breite": 1080,
+      "hoehe": 1920,
+      "art": "bild",
+      "endung": "jpg",
+      "zweck": "Story-Standbild, 9:16. Ankuendigung, Zitatkarte, Verweis auf den Beitrag.",
+      "sicher": [
+        150,
+        250
+      ]
+    },
+    "titelbild": {
+      "breite": 1600,
+      "hoehe": 900,
+      "art": "bild",
+      "endung": "jpg",
+      "zweck": "Titelbild fuer Seiten und Lektionen der WebApp, 16:9.",
+      "sicher": [
+        0,
+        0
+      ]
+    }
+  },
+  "slide_typen": {
+    "haken": {
+      "pflicht": [
+        "titel"
+      ],
+      "erlaubt": [
+        "bild",
+        "motiv",
+        "unterzeile"
+      ]
+    },
+    "inhalt": {
+      "pflicht": [
+        "text"
+      ],
+      "erlaubt": [
+        "bild",
+        "kopf",
+        "motiv",
+        "quelle"
+      ]
+    },
+    "zitat": {
+      "pflicht": [
+        "text"
+      ],
+      "erlaubt": [
+        "bild",
+        "herkunft",
+        "motiv"
+      ]
+    },
+    "frage": {
+      "pflicht": [
+        "text"
+      ],
+      "erlaubt": [
+        "bild",
+        "kopf",
+        "motiv"
+      ]
+    },
+    "ende": {
+      "pflicht": [
+        "merksatz"
+      ],
+      "erlaubt": [
+        "abbinder",
+        "bild",
+        "motiv"
+      ]
+    }
+  },
+  "marken": {
+    "denkbeleg": {
+      "anzeigename": "@denkbeleg",
+      "vorlage": "sachlich",
+      "farben": {
+        "papier": "#F5F2EC",
+        "tinte": "#16191D",
+        "marker": "#FFE45C",
+        "quelle": "#6B7280",
+        "stempel": "#C2352B",
+        "raster": "#E4DFD4",
+        "neben": "#3C4148"
+      },
+      "schriften": {
+        "titel": "Archivo",
+        "fliess": "Inter",
+        "technisch": "JetBrainsMono"
+      },
+      "standardformate": [
+        "karussell"
+      ],
+      "abbinder": "@denkbeleg"
+    },
+    "shortheaven3": {
+      "anzeigename": "@shortheaven3",
+      "vorlage": "seriflastig",
+      "farben": {
+        "grund": "#1B2336",
+        "schrift": "#9E826A",
+        "gedaempft": "#8B7360",
+        "_gedaempft_warum": "Nicht dunkler. #6E5C4C kam auf 2,46:1 gegen den Grund und war auf einem Handy bei Sonne nicht mehr zu lesen; #8B7360 liegt bei 3,52:1 und bleibt trotzdem deutlich leiser als die Hauptfarbe (4,37:1).",
+        "linie": "rgba(158,130,106,.28)",
+        "schleier": "rgba(27,35,54,.62)"
+      },
+      "schriften": {
+        "titel": "EBGaramond",
+        "fliess": "EBGaramond",
+        "technisch": "EBGaramond"
+      },
+      "standardformate": [
+        "karussell",
+        "reel"
+      ],
+      "abbinder": "@shortheaven3"
+    }
+  }
+}

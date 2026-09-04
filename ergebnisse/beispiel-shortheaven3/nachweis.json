@@ -1,0 +1,26 @@
+{
+  "job": "beispiel-shortheaven3",
+  "marke": "shortheaven3",
+  "termin": "2026-09-21T05:30:00+02:00",
+  "ausgaben": [
+    "reel",
+    "karussell"
+  ],
+  "schriften": [
+    {
+      "familie": "EBGaramond",
+      "lizenz": "OFL-1.1",
+      "quelle": "https://raw.githubusercontent.com/google/fonts/main/ofl/ebgaramond/EBGaramond%5Bwght%5D.ttf"
+    },
+    {
+      "familie": "EBGaramondItalic",
+      "lizenz": "OFL-1.1",
+      "quelle": "https://raw.githubusercontent.com/google/fonts/main/ofl/ebgaramond/EBGaramond-Italic%5Bwght%5D.ttf"
+    }
+  ],
+  "stimme": {
+    "modell": "de_DE-thorsten-medium",
+    "lizenz": "CC0, Thorsten-Voice-Datensatz"
+  },
+  "musik": "im Programm erzeugt, keine fremden Rechte"
+}

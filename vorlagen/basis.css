@@ -1,0 +1,88 @@
+/* Grundgeruest, markenneutral.
+   Hier steht nur, was fuer jede Marke und jedes Format gilt: die Buehne, die
+   Ebenen und die Sicherheitszonen. Farbe und Schrift kommen aus der Marke.
+
+   Masseinheit ist rem. `html` bekommt je Format eine eigene Grundgroesse
+   (breite/1080 * 16px), damit ein 1600 Pixel breites Titelbild nicht mit der
+   Schriftgroesse eines 1080er Karussells gesetzt wird. Alles in der Vorlage
+   rechnet in rem und skaliert damit von selbst mit. */
+
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+html, body {
+  width: var(--breite);
+  height: var(--hoehe);
+  overflow: hidden;
+}
+
+body {
+  position: relative;
+  font-family: var(--schrift-fliess), serif;
+  font-synthesis: none;              /* lieber ein Fehler als eine gefaelschte Fettung */
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* --------------------------------------------------------------- Ebenen
+   grund     Foto oder Farbfeld. Im Video wird nur diese Ebene bewegt.
+   schleier  Leseschleier darueber, damit Text auf jedem Foto steht.
+   blatt     der Satz. Wird im Video nie skaliert und bleibt dadurch scharf. */
+
+.grund {
+  position: absolute; inset: 0; z-index: 0;
+  background-size: cover; background-position: center;
+}
+.grund img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+.schleier { position: absolute; inset: 0; z-index: 1; }
+
+.blatt {
+  position: relative; z-index: 2;
+  width: 100%; height: 100%;
+  display: flex; flex-direction: column;
+  padding:
+    calc(var(--sicher-oben) + var(--rand-oben))
+    var(--rand-seite)
+    calc(var(--sicher-unten) + var(--rand-unten));
+}
+
+/* --------------------------------------------------- Ebenen fuer das Video
+   Fuer den Videoweg wird dieselbe Seite dreimal aufgenommen: einmal ganz,
+   einmal nur der Grund (der zieht), einmal nur der Satz (der steht still).
+   Zwei Klassen statt zwei Vorlagen - so kann der Satz nicht auseinanderlaufen. */
+
+.schicht-hintergrund .blatt { visibility: hidden; }
+
+.schicht-text,
+.schicht-text .grund,
+.schicht-text .schleier { background: transparent !important; }
+.schicht-text .grund,
+.schicht-text .schleier { display: none; }
+
+/* ------------------------------------------------------------ Gemeinsames */
+
+.zaehler {
+  position: absolute;
+  top: calc(var(--sicher-oben) + var(--rand-oben) * .5);
+  right: var(--rand-seite);
+  font-family: var(--schrift-technisch), monospace;
+  font-size: 1.5rem; letter-spacing: .06em;
+  opacity: .85;
+}
+
+.fliess p + p { margin-top: 1.9rem; }
+
+b, strong { font-weight: 700; }
+em { font-style: italic; }
+
+/* Ein sichtbares Zeichen dafuer, dass ein Wort betont ist - jede Marke faerbt
+   es anders, die Mechanik ist dieselbe. */
+mark { color: inherit; padding: 0 .06em; }
+
+/* Kein Schusterjunge und keine Hurenkinder, und keine Trennung mitten im
+   Fremdwort. Bei 35px Schrift auf 890px Breite faellt beides sofort auf. */
+.fliess, .kopf, h1, .merksatz {
+  hyphens: none;
+  overflow-wrap: break-word;
+  orphans: 2; widows: 2;
+}

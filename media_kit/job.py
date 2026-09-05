@@ -21,13 +21,18 @@ from pathlib import Path
 from . import formate
 
 # Welche Felder ein Slide-Typ braucht und welche er kennt.
+# "bildnachweis" gehoert ueberall dazu, wo ein Bild stehen darf: wer eine feste
+# Adresse eintraegt, statt suchen zu lassen, bekommt sonst keinen Nachweis - die
+# Suche liefert Urheber und Lizenz mit, eine nackte Adresse nicht.
+_BILD = {"bild", "motiv", "bildnachweis"}
+
 SLIDE_TYPEN: dict[str, tuple[set[str], set[str]]] = {
     # typ:          (pflicht,                 zusaetzlich erlaubt)
-    "haken":  ({"titel"},    {"unterzeile", "bild", "motiv"}),
-    "inhalt": ({"text"},     {"kopf", "quelle", "bild", "motiv"}),
-    "zitat":  ({"text"},     {"herkunft", "bild", "motiv"}),
-    "frage":  ({"text"},     {"kopf", "bild", "motiv"}),
-    "ende":   ({"merksatz"}, {"abbinder", "bild", "motiv"}),
+    "haken":  ({"titel"},    {"unterzeile"} | _BILD),
+    "inhalt": ({"text"},     {"kopf", "quelle"} | _BILD),
+    "zitat":  ({"text"},     {"herkunft"} | _BILD),
+    "frage":  ({"text"},     {"kopf"} | _BILD),
+    "ende":   ({"merksatz"}, {"abbinder"} | _BILD),
 }
 
 SLUG = re.compile(r"^[a-z0-9]+(?:-[a-z0-9]+)*$")

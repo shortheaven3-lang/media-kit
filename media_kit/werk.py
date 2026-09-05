@@ -91,8 +91,27 @@ def _quellbilder(job: Job, lager: Lager, quer: bool,
             except Exception as fehler:
                 print(f"  Slide {nummer}: Hintergrund faellt aus - {fehler}")
                 merker[kennung] = (None, None)
-        ergebnis.append(merker[kennung])
+        quelle, treffer = merker[kennung]
+        ergebnis.append((quelle, _mit_nachweis(treffer, slide.get("bildnachweis"))))
     return ergebnis
+
+
+def _mit_nachweis(treffer, angaben):
+    """Ergaenzt einen Treffer um die Angaben aus der Job-Datei.
+
+    Eine feste Adresse ist der vorgesehene Weg - sie wird beim Redigieren
+    gesetzt, nachdem jemand die Treffer wirklich angesehen hat, und macht den
+    Renderlauf reproduzierbar. Nur weiss die Adresse allein nichts ueber
+    Urheber und Lizenz. Wer sie eintraegt, kann beides unter "bildnachweis"
+    danebenschreiben; dann steht es hinterher in nachweis.json, genau wie bei
+    einem gesuchten Bild.
+    """
+    if not angaben or treffer is None:
+        return treffer
+    from dataclasses import replace
+    erlaubt = {"urheber", "lizenz", "fundstelle", "kennung", "anbieter"}
+    return replace(treffer, **{k: str(v) for k, v in angaben.items()
+                               if k in erlaubt and v})
 
 
 def _hintergruende(job: Job, m: Marke, lager: Lager, breite: int, hoehe: int,

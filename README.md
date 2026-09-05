@@ -116,6 +116,7 @@ Weitere Felder:
 | Feld | Bedeutung |
 |---|---|
 | `slides[].bild` | `datei:…`, eine `https://`-Adresse, `pexels:<kennung>` oder `motiv:<suchwort>` |
+| `slides[].bildnachweis` | Urheber, Lizenz und Fundstelle zu einer festen Adresse |
 | `slides[].sprich` | was vorgelesen wird, wenn es vom Slide-Text abweichen soll |
 | `ton.stimmung` | welche Tonstimmung aus der Markendatei gilt |
 | `video.slidedauer` | Standzeit je Slide, wenn keine Stimme die Länge vorgibt |
@@ -166,6 +167,45 @@ Speichern der Bilder — für ein Repository, das sie festhält, unpassend),
 **ElevenLabs/HeyGen/LMNT/Typecast** (Konto und monatliches Freikontingent, das
 am Posting-Morgen ausgeht), **edge-tts** (undokumentierter Microsoft-Endpunkt,
 jederzeit abschaltbar).
+
+## Der vorgesehene Weg zu einem Hintergrundbild
+
+Nicht suchen lassen, sondern aussuchen. Die Suche im Renderlauf ist blind und
+trifft oft daneben; eine feste Adresse macht den Lauf dagegen Bild für Bild
+reproduzierbar.
+
+```bash
+python3 -m media_kit.cli suchen "leerer strand abenddaemmerung" --anzahl 5
+```
+
+Die Ausgabe nennt zu jedem Treffer Adresse, Urheber, Lizenz und Fundstelle.
+Was davon passt, wandert in die Slide:
+
+```json
+{
+  "typ": "haken",
+  "titel": "…",
+  "bild": "https://images.pexels.com/photos/35854894/pexels-photo-35854894.jpeg?auto=compress&cs=tinysrgb&fit=crop&w=1400&h=2100",
+  "bildnachweis": {
+    "anbieter": "pexels",
+    "kennung": "35854894",
+    "urheber": "Any Melnic",
+    "lizenz": "Pexels-Lizenz (kommerziell erlaubt, Namensnennung nicht verlangt)",
+    "fundstelle": "https://www.pexels.com/photo/misty-forest-path-with-solo-walker-in-early-morning-35854894/"
+  }
+}
+```
+
+Zwei Dinge daran sind wichtig:
+
+**Der Schlüssel wird nur zum Suchen gebraucht, nicht zum Herunterladen.** Eine
+Adresse auf `images.pexels.com` holt der Renderlauf ohne jedes Zugangsdatum.
+Wer die Bilder anderswo aussucht — im Browser, über einen verbundenen Dienst —
+kommt ganz ohne `PEXELS_API_KEY` aus.
+
+**Ohne `bildnachweis` geht der Nachweis verloren.** Die Suche liefert Urheber
+und Lizenz mit, eine nackte Adresse nicht. Ohne dieses Feld wäre ausgerechnet
+der empfohlene Weg derjenige, auf dem nichts im `nachweis.json` landet.
 
 ## Wenn kein Bild gefunden wird
 

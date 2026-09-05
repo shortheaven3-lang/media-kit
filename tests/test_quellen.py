@@ -123,3 +123,39 @@ def test_freie_lizenzen_bleiben_drin(lizenz):
     """Der Vorlaeufer pruefte auf die blosse Buchstabenfolge und warf damit
     jede Lizenz in britischer oder franzoesischer Schreibweise hinaus."""
     assert not quellen._eingeschraenkt(lizenz), lizenz
+
+
+# ------------------------------------------------------------ Bildnachweis
+def test_nachweis_aus_der_job_datei_ergaenzt_eine_feste_adresse(tmp_path):
+    """Eine nackte Adresse weiss nichts ueber Urheber und Lizenz.
+
+    Der vorgesehene Weg ist die feste Adresse, weil sie den Renderlauf
+    reproduzierbar macht. Ohne dieses Feld waere er zugleich der Weg, auf dem
+    der Nachweis verlorengeht - und das ausgerechnet beim empfohlenen.
+    """
+    from media_kit.werk import _mit_nachweis
+
+    roh = quellen.Treffer(url="https://images.pexels.com/photos/1/x.jpeg",
+                          anbieter="adresse")
+    ergaenzt = _mit_nachweis(roh, {
+        "anbieter": "pexels", "urheber": "Any Melnic",
+        "lizenz": "Pexels-Lizenz", "kennung": "35854894",
+    })
+    assert ergaenzt.urheber == "Any Melnic"
+    assert ergaenzt.anbieter == "pexels"
+    assert ergaenzt.url == roh.url, "die Adresse darf nicht ueberschrieben werden"
+
+
+def test_nachweis_ignoriert_unbekannte_felder(tmp_path):
+    from media_kit.werk import _mit_nachweis
+    roh = quellen.Treffer(url="https://x/y.jpg", anbieter="adresse")
+    ergaenzt = _mit_nachweis(roh, {"urheber": "A", "url": "https://boese/", "quatsch": 1})
+    assert ergaenzt.urheber == "A"
+    assert ergaenzt.url == "https://x/y.jpg"
+
+
+def test_ohne_nachweis_bleibt_der_treffer_unveraendert():
+    from media_kit.werk import _mit_nachweis
+    roh = quellen.Treffer(url="https://x/y.jpg", anbieter="adresse")
+    assert _mit_nachweis(roh, None) is roh
+    assert _mit_nachweis(None, {"urheber": "A"}) is None

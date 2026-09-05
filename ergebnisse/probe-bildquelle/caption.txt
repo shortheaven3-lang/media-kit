@@ -1,1 +1,1 @@
-Probelauf der Bildquellen.
+Probelauf der Bildquellen: feste Adresse und Suche.

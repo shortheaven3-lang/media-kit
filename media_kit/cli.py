@@ -128,7 +128,10 @@ def befehl_suchen(args) -> int:
     treffer = quellen.suchen(args.begriff, args.anbieter, args.anzahl, args.quer)
     if not treffer:
         print("Nichts gefunden. Ohne PEXELS_API_KEY und PIXABAY_API_KEY bleibt nur "
-              "Wikimedia Commons - und das braucht andere Suchworte (englisch, sachlich).")
+              "Wikimedia Commons - und das braucht andere Suchworte (englisch, sachlich).\n"
+              "Ein Schluessel ist aber nur zum Suchen noetig: wer ein Bild anderswo "
+              "aussucht, traegt dessen Adresse einfach als \"bild\" ein. Heruntergeladen "
+              "wird sie ohne jedes Zugangsdatum.")
         return 1
     for t in treffer:
         print(f"\n  {t.anbieter}:{t.kennung}")
@@ -137,7 +140,17 @@ def befehl_suchen(args) -> int:
             print(f"    {t.urheber} - {t.lizenz}")
         if t.fundstelle:
             print(f"    {t.fundstelle}")
-    print("\nDie gewaehlte Adresse gehoert als \"bild\" in die Slide der Job-Datei.")
+
+    erster = treffer[0]
+    print("\nDie gewaehlte Adresse gehoert als \"bild\" in die Slide, der Rest als"
+          "\n\"bildnachweis\" daneben - sonst steht am Ende kein Urheber im Nachweis:\n")
+    print(json.dumps({
+        "bild": erster.url,
+        "bildnachweis": {k: v for k, v in
+                         (("anbieter", erster.anbieter), ("kennung", erster.kennung),
+                          ("urheber", erster.urheber), ("lizenz", erster.lizenz),
+                          ("fundstelle", erster.fundstelle)) if v},
+    }, ensure_ascii=False, indent=2))
     return 0
 
 

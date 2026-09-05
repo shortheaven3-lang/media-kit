@@ -84,14 +84,14 @@ def _quellbilder(job: Job, lager: Lager, quer: bool,
         if not angabe:
             ergebnis.append((None, None))
             continue
-        marke_ = (angabe, quer)
-        if marke_ not in merker:
+        kennung = (angabe, quer)
+        if kennung not in merker:
             try:
-                merker[marke_] = quellen.beschaffen(angabe, lager, WURZEL, quer=quer)
+                merker[kennung] = quellen.beschaffen(angabe, lager, WURZEL, quer=quer)
             except Exception as fehler:
                 print(f"  Slide {nummer}: Hintergrund faellt aus - {fehler}")
-                merker[marke_] = (None, None)
-        ergebnis.append(merker[marke_])
+                merker[kennung] = (None, None)
+        ergebnis.append(merker[kennung])
     return ergebnis
 
 

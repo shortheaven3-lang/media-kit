@@ -75,6 +75,7 @@
       ],
       "erlaubt": [
         "bild",
+        "bildnachweis",
         "motiv",
         "unterzeile"
       ]
@@ -85,6 +86,7 @@
       ],
       "erlaubt": [
         "bild",
+        "bildnachweis",
         "kopf",
         "motiv",
         "quelle"
@@ -96,6 +98,7 @@
       ],
       "erlaubt": [
         "bild",
+        "bildnachweis",
         "herkunft",
         "motiv"
       ]
@@ -106,6 +109,7 @@
       ],
       "erlaubt": [
         "bild",
+        "bildnachweis",
         "kopf",
         "motiv"
       ]
@@ -117,6 +121,7 @@
       "erlaubt": [
         "abbinder",
         "bild",
+        "bildnachweis",
         "motiv"
       ]
     }

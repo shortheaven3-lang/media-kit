@@ -25,7 +25,10 @@ import urllib.error
 import urllib.request
 from pathlib import Path
 
-ABTEILUNGEN = ("schriften", "bilder", "stimmen", "ton", "seiten", "ergebnisse")
+# stimmen = die Sprachmodelle, saetze = die einzeln gesprochenen Saetze,
+# ton = die fertig gemischte Tonspur eines Beitrags.
+ABTEILUNGEN = ("schriften", "bilder", "stimmen", "saetze", "ton", "seiten",
+               "ergebnisse")
 
 
 def schluessel(*teile) -> str:

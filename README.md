@@ -85,8 +85,24 @@ man einen einzigen durchlaufenden Bogen, und genau das klingt nach Maschine.
 Satzweise erzeugt bekommt jeder Satz seine eigene Melodie, dazwischen wird
 geschwiegen — nach einer Frage länger als nach einer Aussage —, und das Tempo
 schwankt um sieben Prozent. Die Schwankung hängt am Satz selbst, nicht am
-Zufall: derselbe Text klingt bei jedem Lauf gleich, sonst wäre das
-Zwischenlager wertlos.
+Zufall, damit derselbe Satz bei jedem Lauf denselben Schlüssel im
+Zwischenlager bekommt.
+
+**Jeder gesprochene Satz liegt im Zwischenlager**, als das WAV, das Piper
+geliefert hat — vor Umtasten, Pausen und Mischung. Das ist keine
+Geschwindigkeitsfrage, sondern eine Frage der Reproduzierbarkeit: Piper ist
+nicht deterministisch. Das VITS-Modell würfelt die Silbenlängen aus, derselbe
+Satz kommt bei jedem Aufruf ein paar Hundertstel länger oder kürzer heraus.
+Hörbar ist das nicht — aber es verschiebt die Standzeiten der Slides, damit die
+Videolänge und damit die ganze Datei. Ein unveränderter Beitrag wurde so bei
+jedem Lauf neu geschnitten und mit rund 6 MB neu eingecheckt; zwei Fassungen
+desselben Reels waren nie gleich lang (gemessen: 40,61 s gegen 41,14 s). Seit
+die Sätze im Lager liegen, spricht ein Lauf ohne Textänderung keinen Satz mehr
+und lädt nicht einmal das Sprachmodell.
+
+Im Schlüssel stehen der Satz, die Stimme, das Sprechtempo, die Rauschanteile
+und die Piper-Fassung. Wer an der Prosodie dreht oder Piper aktualisiert,
+bekommt neue Aufnahmen; wer nur eine Bildunterschrift ändert, nicht.
 
 Weitere Befehle:
 
@@ -345,6 +361,11 @@ Geprüft wird das, was still kaputtgeht:
 * **Das Zwischenlager** — vor allem, dass ein abgebrochener Bau nichts
   hinterlässt. Eine halbe Datei, die als fertig gilt, ist der unangenehmste
   Cache-Fehler: sie tarnt sich als kaputtes Ergebnis statt als Fehler.
+* **Die gelagerten Sätze** — dass ein zweiter Lauf keinen Satz mehr spricht und
+  dasselbe herauskommt. Der Piper-Ersatz in der Prüfung liefert dabei
+  absichtlich nie zweimal dasselbe, so wie das echte Modell: ein
+  deterministischer Ersatz würde die Prüfung wertlos machen, weil dann auch ein
+  kaputtes Lager gleiche Ergebnisse lieferte.
 
 ## Grenzen
 

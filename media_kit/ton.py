@@ -18,6 +18,21 @@ ist ein ausgefallener Beitrag. Deshalb gilt hier fuer beides dieselbe Regel:
           Recht im Spiel, und Instagrams Tonerkennung findet nichts zum
           Anschlagen.
 
+Nichts zweimal sprechen
+-----------------------
+Piper ist nicht deterministisch. Das VITS-Modell wuerfelt die Silbenlaengen
+(stochastic duration predictor), derselbe Satz kommt bei jedem Aufruf ein paar
+Hundertstel laenger oder kuerzer heraus. Hoerbar ist das nicht - aber es
+verschiebt die Standzeiten der Slides, damit die Videolaenge und damit die
+ganze Datei. Ein unveraenderter Beitrag wurde so bei jedem Lauf neu geschnitten
+und mit rund 6 MB neu eingecheckt, und zwei Fassungen desselben Reels waren nie
+gleich lang.
+
+Deshalb liegt jeder gesprochene Satz im Zwischenlager, und zwar als das WAV,
+das Piper geliefert hat - vor Umtasten, Pausen und Mischung. Aus derselben
+Eingabe kommt seitdem dieselbe Datei heraus. Ein Lauf ohne Textaenderung
+spricht keinen Satz mehr und laedt nicht einmal das Sprachmodell.
+
 Ohne scipy
 ----------
 Der Vorlaeufer im Autoposter benutzte scipy fuer vier Filteraufrufe. scipy
@@ -36,6 +51,8 @@ from pathlib import Path
 
 import numpy as np
 
+from .zwischenlager import schluessel
+
 SR = 44100
 PAUSE_NACH_SATZ = 0.75      # Sekunden Stille hinter jeder gesprochenen Slide
 MINDESTSTAND = 2.4          # so lange steht eine Slide mindestens
@@ -51,6 +68,12 @@ PAUSE_DOPPELPUNKT = 0.28    # ein Doppelpunkt kuendigt an, das braucht Luft
 VORLAUF = 0.12              # Stille am Anfang, sonst klemmt der erste Laut
 TEMPO_STREUUNG = 0.07       # +/- 7 % Sprechtempo je Satz
 TEMPO_GRUND = 1.18          # etwas langsamer als die Voreinstellung
+
+# Rauschanteile der Synthese. Sie stehen hier und nicht im Aufruf, weil sie in
+# den Schluessel des Zwischenlagers eingehen: wer daran dreht, will neue
+# Aufnahmen und soll sie auch bekommen.
+RAUSCHEN = 0.6
+RAUSCHEN_W = 0.75
 
 
 # ------------------------------------------------------------------ Werkzeug
@@ -232,8 +255,9 @@ def _tempo(satz: str) -> float:
     """Sprechtempo fuer diesen Satz, leicht schwankend.
 
     Gleichmaessiges Tempo ueber alle Saetze ist das zweite, was maschinell
-    klingt. Die Schwankung haengt am Satz selbst und nicht am Zufall - damit
-    derselbe Text zweimal gleich klingt und das Zwischenlager gilt.
+    klingt. Die Schwankung haengt am Satz selbst und nicht am Zufall - sonst
+    bekaeme derselbe Satz bei jedem Lauf einen anderen Schluessel im
+    Zwischenlager und wuerde jedes Mal neu gesprochen.
     """
     # Nicht hash(): Pythons Zeichenketten-Hash ist je Prozess zufaellig
     # gesalzen. Derselbe Satz bekaeme bei jedem Lauf ein anderes Tempo, das
@@ -306,6 +330,100 @@ def _stimme_laden(namen: list[str], lager: Path):
     return None, ""
 
 
+# --------------------------------------------------------- Satz im Lager
+_FASSUNG = ""
+
+
+def fassung() -> str:
+    """Fassung von Piper. Gehoert in den Schluessel des Zwischenlagers.
+
+    Eine neue Fassung spricht denselben Satz anders. Ohne sie im Schluessel
+    bekaeme ein Reel nach dem Aktualisieren zwei Stimmlagen: die unveraenderten
+    Saetze aus dem Lager, die geaenderten frisch gesprochen.
+    """
+    global _FASSUNG
+    if not _FASSUNG:
+        from importlib.metadata import PackageNotFoundError, version
+        for name in ("piper-tts", "piper"):
+            try:
+                _FASSUNG = version(name)
+                break
+            except PackageNotFoundError:
+                continue
+        else:
+            _FASSUNG = "ohne"
+    return _FASSUNG
+
+
+def _ablage(satz: str, stimmname: str, lager: Path) -> Path:
+    """Wo dieser Satz, in dieser Stimme, unter diesen Einstellungen liegt."""
+    name = schluessel(satz, stimmname, fassung(),
+                      round(_tempo(satz), 6), RAUSCHEN, RAUSCHEN_W)
+    ordner = Path(lager) / "saetze"
+    ordner.mkdir(parents=True, exist_ok=True)
+    return ordner / f"{name}.wav"
+
+
+def _aus_lager(satz: str, stimmname: str, lager: Path) -> np.ndarray | None:
+    ablage = _ablage(satz, stimmname, lager)
+    if ablage.exists() and ablage.stat().st_size > 0:
+        return _aus_wav(ablage.read_bytes())
+    return None
+
+
+def _hinlegen(ziel: Path, roh: bytes) -> None:
+    """Erst daneben schreiben, dann umbenennen.
+
+    Ein abgebrochener Lauf soll kein halbes WAV hinterlassen, das beim
+    naechsten Mal als fertige Aufnahme durchgeht - der unangenehmste
+    Cache-Fehler, weil er sich als Ergebnis tarnt und nicht als Fehler.
+    """
+    neben = ziel.with_suffix(f".teil{os.getpid()}")
+    try:
+        neben.write_bytes(roh)
+        neben.replace(ziel)
+    finally:
+        if neben.exists():
+            neben.unlink()
+
+
+def _aus_wav(roh: bytes) -> np.ndarray:
+    """WAV-Bytes zu mono float32 bei 44 100 Hz."""
+    with wave.open(io.BytesIO(roh), "rb") as w:
+        daten = w.readframes(w.getnframes())
+        kanaele, rate = w.getnchannels(), w.getframerate()
+    x = np.frombuffer(daten, np.int16).astype(np.float32) / 32768.0
+    if kanaele > 1:
+        x = x.reshape(-1, kanaele).mean(axis=1)
+    return _umtasten(x, rate)
+
+
+# ------------------------------------------------------------------ Sprechen
+def _zusammensetzen(zerlegt: list[list[str]], hole) -> list[np.ndarray] | None:
+    """Ein Clip je Slide, aus den Saetzen und der Stille dazwischen.
+
+    `hole(satz)` liefert die Aufnahme oder None; None bricht alles ab. Die
+    Zerlegung steht hier nur einmal, damit der Weg aus dem Lager und der Weg
+    ueber Piper nicht auseinanderlaufen koennen - sonst klaenge ein Reel aus
+    dem Lager anders als dasselbe Reel frisch gesprochen.
+    """
+    clips = []
+    for teile in zerlegt:
+        if not teile:
+            clips.append(np.zeros(0, np.float32))
+            continue
+        stueck = [np.zeros(int(VORLAUF * SR), np.float32)]
+        for i, satz in enumerate(teile):
+            gesprochen = hole(satz)
+            if gesprochen is None:
+                return None
+            stueck.append(gesprochen)
+            if i < len(teile) - 1:
+                stueck.append(np.zeros(int(_pause_nach(satz) * SR), np.float32))
+        clips.append(np.concatenate(stueck))
+    return clips
+
+
 def sprechen(saetze: list[str], stimmname: str, lager: Path,
              rueckfall: list[str] | None = None) -> list[np.ndarray] | None:
     """Ein Sprachclip je Slide, mono float32 bei 44 100 Hz.
@@ -315,8 +433,23 @@ def sprechen(saetze: list[str], stimmname: str, lager: Path,
     "vorgelesen" und "abgespielt": Piper erzeugt je Aufruf eine Sprechmelodie,
     und ein ganzer Absatz bekommt davon nur eine einzige.
 
+    Jeder Satz liegt danach im Zwischenlager. Steht schon alles da, wird Piper
+    gar nicht geladen - siehe den Abschnitt oben im Modul.
+
     None heisst: keine Stimme, das Reel laeuft stumm weiter.
     """
+    zerlegt = [saetze_aus(t) for t in saetze]
+    gesamt = sum(len(t) for t in zerlegt)
+
+    # Erst nachsehen, ob schon alles dasteht. Alles oder nichts: einen Teil aus
+    # dem Lager zu nehmen und fuer den Rest ein Modell zu laden, das vielleicht
+    # ein anderes ist als das von damals, mischte zwei Stimmen in einem Reel.
+    fertig = _zusammensetzen(zerlegt, lambda s: _aus_lager(s, stimmname, lager))
+    if fertig is not None:
+        if gesamt:
+            print(f"  Stimme: alle {gesamt} Saetze aus dem Zwischenlager")
+        return fertig
+
     try:
         from piper import SynthesisConfig
     except Exception as fehler:
@@ -330,28 +463,38 @@ def sprechen(saetze: list[str], stimmname: str, lager: Path,
     if genommen != stimmname:
         print(f"  Stimme {stimmname} nicht verfuegbar - genommen wird {genommen}")
 
-    clips = []
-    for text in saetze:
-        teile = saetze_aus(text)
-        if not teile:
-            clips.append(np.zeros(0, np.float32))
-            continue
+    # Unter `genommen` ablegen, nicht unter dem gewuenschten Namen: ein
+    # Rueckfall soll die Aufnahmen der eigentlichen Stimme weder ueberschreiben
+    # noch spaeter als solche ausgegeben bekommen.
+    gezaehlt = [0]
 
-        stueck = [np.zeros(int(VORLAUF * SR), np.float32)]
-        for i, satz in enumerate(teile):
-            gesprochen = _einen_satz(voice, satz, SynthesisConfig)
-            if gesprochen is None:
-                return None
-            stueck.append(gesprochen)
-            if i < len(teile) - 1:
-                stueck.append(np.zeros(int(_pause_nach(satz) * SR), np.float32))
-        clips.append(np.concatenate(stueck))
+    def hole(satz: str) -> np.ndarray | None:
+        schon = _aus_lager(satz, genommen, lager)
+        if schon is not None:
+            gezaehlt[0] += 1
+            return schon
+        roh = _einen_satz(voice, satz, SynthesisConfig)
+        if roh is None:
+            return None
+        _hinlegen(_ablage(satz, genommen, lager), roh)
+        return _aus_wav(roh)
+
+    clips = _zusammensetzen(zerlegt, hole)
+    if clips is not None:
+        print(f"  Stimme: {gesamt - gezaehlt[0]} von {gesamt} Saetzen gesprochen, "
+              f"{gezaehlt[0]} aus dem Zwischenlager")
     return clips
 
 
-def _einen_satz(voice, satz: str, SynthesisConfig) -> np.ndarray | None:
+def _einen_satz(voice, satz: str, SynthesisConfig) -> bytes | None:
+    """Einen Satz sprechen und das WAV zurueckgeben, wie Piper es liefert.
+
+    Bewusst unbearbeitet: was ins Lager geht, ist genau das Ergebnis der
+    Synthese. Aendert sich spaeter etwas am Umtasten oder an den Pausen, gelten
+    die Aufnahmen weiter - und ein Blick ins Lager laesst sich abspielen.
+    """
     konf = SynthesisConfig(length_scale=_tempo(satz),
-                           noise_scale=0.6, noise_w_scale=0.75)
+                           noise_scale=RAUSCHEN, noise_w_scale=RAUSCHEN_W)
     puffer = io.BytesIO()
     try:
         with wave.open(puffer, "wb") as w:
@@ -359,14 +502,7 @@ def _einen_satz(voice, satz: str, SynthesisConfig) -> np.ndarray | None:
     except Exception as fehler:
         print(f"  Satz nicht gesprochen ({type(fehler).__name__}: {fehler})")
         return None
-    puffer.seek(0)
-    with wave.open(puffer, "rb") as w:
-        roh = w.readframes(w.getnframes())
-        kanaele, rate = w.getnchannels(), w.getframerate()
-    x = np.frombuffer(roh, np.int16).astype(np.float32) / 32768.0
-    if kanaele > 1:
-        x = x.reshape(-1, kanaele).mean(axis=1)
-    return _umtasten(x, rate)
+    return puffer.getvalue()
 
 
 # ------------------------------------------------------------------ Mischen

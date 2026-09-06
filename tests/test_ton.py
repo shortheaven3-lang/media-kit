@@ -147,3 +147,129 @@ def test_das_tempo_ist_ueber_prozessgrenzen_hinweg_gleich():
                                              "PATH": "/usr/bin:/bin"}).stdout.strip()
               for n in (0, 1, 2)}
     assert len(laeufe) == 1, f"Tempo haengt am Zufall: {laeufe}"
+
+
+# ------------------------------------------------- Saetze im Zwischenlager
+class _PiperErsatz:
+    """Piper-Ersatz, der zaehlt - und wie das echte Modell nie zweimal
+    dasselbe liefert.
+
+    Genau das ist der Punkt: VITS wuerfelt die Silbenlaengen. Ein Ersatz, der
+    deterministisch waere, wuerde die Pruefung wertlos machen, weil dann auch
+    ein kaputtes Zwischenlager gleiche Ergebnisse lieferte.
+    """
+
+    def __init__(self):
+        self.aufrufe = 0
+
+    def synthesize_wav(self, satz, w, syn_config=None):
+        self.aufrufe += 1
+        w.setnchannels(1)
+        w.setsampwidth(2)
+        w.setframerate(22050)
+        laenge = 2000 + self.aufrufe * 137
+        w.writeframes((np.arange(laenge) % 3000).astype("<i2").tobytes())
+
+
+@pytest.fixture
+def piper(monkeypatch):
+    import sys as _sys
+    import types
+    stimme = _PiperErsatz()
+    modul = types.ModuleType("piper")
+    modul.SynthesisConfig = lambda **kw: kw
+    monkeypatch.setitem(_sys.modules, "piper", modul)
+    monkeypatch.setattr(ton, "_stimme_laden", lambda namen, lager: (stimme, namen[0]))
+    # Die Piper-Fassung geht in den Schluessel ein; im Test soll sie nicht von
+    # der Maschine abhaengen.
+    monkeypatch.setattr(ton, "fassung", lambda: "pruefstand")
+    return stimme
+
+
+TEXT = ["Du bist nicht müde. Du bist unentschieden.", "Und jetzt?"]
+
+
+def test_der_zweite_lauf_spricht_keinen_satz_mehr(piper, tmp_path):
+    """Der Grund fuer das Ganze: sonst ist jedes Reel bei jedem Lauf anders
+    lang, wird neu geschnitten und mit einigen MB neu eingecheckt."""
+    erst = ton.sprechen(TEXT, "de_DE-thorsten-high", tmp_path)
+    nach_dem_ersten = piper.aufrufe
+    assert nach_dem_ersten == 3, "drei Saetze, drei Aufrufe"
+
+    zweit = ton.sprechen(TEXT, "de_DE-thorsten-high", tmp_path)
+    assert piper.aufrufe == nach_dem_ersten, "es wurde noch einmal gesprochen"
+    for a, b in zip(erst, zweit):
+        assert np.array_equal(a, b)
+
+
+def test_ohne_lager_klingt_jeder_lauf_anders(piper, tmp_path):
+    """Sicherung fuer die Pruefung oben: der Ersatz schwankt wirklich."""
+    erst = ton.sprechen(TEXT, "de_DE-thorsten-high", tmp_path / "a")
+    zweit = ton.sprechen(TEXT, "de_DE-thorsten-high", tmp_path / "b")
+    assert len(erst[0]) != len(zweit[0])
+
+
+def test_nur_der_geaenderte_satz_wird_neu_gesprochen(piper, tmp_path):
+    ton.sprechen(TEXT, "de_DE-thorsten-high", tmp_path)
+    vorher = piper.aufrufe
+    geaendert = [TEXT[0], "Oder doch nicht?"]
+    ton.sprechen(geaendert, "de_DE-thorsten-high", tmp_path)
+    assert piper.aufrufe == vorher + 1
+
+
+def test_eine_andere_stimme_bekommt_eigene_aufnahmen(piper, tmp_path):
+    ton.sprechen(TEXT, "de_DE-thorsten-high", tmp_path)
+    vorher = piper.aufrufe
+    ton.sprechen(TEXT, "de_DE-thorsten-medium", tmp_path)
+    assert piper.aufrufe == vorher + 3, "die Stimme fehlt im Schluessel"
+
+
+def test_ein_anderes_sprechtempo_bekommt_eigene_aufnahmen(piper, tmp_path, monkeypatch):
+    """Sonst dreht man an der Prosodie und hoert am Ergebnis nichts."""
+    ton.sprechen(TEXT, "de_DE-thorsten-high", tmp_path)
+    vorher = piper.aufrufe
+    monkeypatch.setattr(ton, "TEMPO_GRUND", ton.TEMPO_GRUND * 1.1)
+    ton.sprechen(TEXT, "de_DE-thorsten-high", tmp_path)
+    assert piper.aufrufe == vorher + 3, "das Tempo fehlt im Schluessel"
+
+
+def test_der_rueckfall_legt_unter_seinem_eigenen_namen_ab(piper, tmp_path, monkeypatch):
+    """Ein Rueckfall entsteht aus einem Netzfehler. Er darf die Aufnahmen der
+    eigentlichen Stimme weder ueberschreiben noch spaeter als solche gelten."""
+    monkeypatch.setattr(ton, "_stimme_laden",
+                        lambda namen, lager: (piper, "de_DE-thorsten-medium"))
+    ton.sprechen(TEXT, "de_DE-thorsten-high", tmp_path,
+                 ["de_DE-thorsten-medium"])
+    vorher = piper.aufrufe
+
+    # Jetzt ist die gewuenschte Stimme wieder da - und muss neu sprechen.
+    monkeypatch.setattr(ton, "_stimme_laden", lambda namen, lager: (piper, namen[0]))
+    ton.sprechen(TEXT, "de_DE-thorsten-high", tmp_path)
+    assert piper.aufrufe == vorher + 3
+
+
+def test_bei_vollem_lager_wird_das_sprachmodell_nicht_geladen(piper, tmp_path, monkeypatch):
+    """Das spart im unveraenderten Lauf den Modellabruf und die Synthese."""
+    ton.sprechen(TEXT, "de_DE-thorsten-high", tmp_path)
+
+    def nicht_laden(namen, lager):
+        raise AssertionError("das Sprachmodell wurde geladen, obwohl alles dalag")
+
+    monkeypatch.setattr(ton, "_stimme_laden", nicht_laden)
+    assert ton.sprechen(TEXT, "de_DE-thorsten-high", tmp_path) is not None
+
+
+def test_es_bleibt_keine_halbe_aufnahme_liegen(piper, tmp_path):
+    ton.sprechen(TEXT, "de_DE-thorsten-high", tmp_path)
+    uebrig = [p.name for p in (tmp_path / "saetze").iterdir() if ".teil" in p.name]
+    assert uebrig == []
+
+
+def test_die_pausen_zwischen_den_saetzen_bleiben_erhalten(piper, tmp_path):
+    """Aus dem Lager muss dasselbe herauskommen wie frisch gesprochen -
+    sonst klaenge ein zwischengelagertes Reel anders als das erste."""
+    erst = ton.sprechen(["Ein Satz. Noch einer."], "de_DE-thorsten-high", tmp_path)[0]
+    zweit = ton.sprechen(["Ein Satz. Noch einer."], "de_DE-thorsten-high", tmp_path)[0]
+    assert np.array_equal(erst, zweit)
+    # Vorlauf, zwei Aufnahmen und die Pause dazwischen.
+    assert len(erst) > int((ton.VORLAUF + ton.PAUSE_SATZ) * ton.SR)

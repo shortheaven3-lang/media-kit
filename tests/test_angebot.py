@@ -143,3 +143,13 @@ def test_trennbare_verben_werden_gefunden():
     j = auftrag(slides=[{"typ": "inhalt",
                          "text": "Du schiebst es auf. Der Vorsatz haelt bis Mittwoch."}])
     assert A.zuordnen(j, DATEN).bereich == "handeln"
+
+
+def test_die_echte_basisadresse_kommt_durch():
+    """Die Platzhaltersperre darf die richtige Adresse nicht mitfangen."""
+    assert not A._ist_platzhalter("https://limerence.blog")
+    daten = {**DATEN, "basis": "https://limerence.blog"}
+    treffer = A.zuordnen(auftrag(slides=[{"typ": "inhalt", "text": "Zusage, Grenze, nein."}]),
+                         daten)
+    assert treffer.adresse == "https://limerence.blog/test/grenzen"
+    assert treffer.als_slide()["adresse"] == "limerence.blog/test/grenzen"

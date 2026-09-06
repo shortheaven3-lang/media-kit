@@ -187,12 +187,16 @@ Vollform nie gefunden. Bei zusammengesetzten Wendungen reicht auch der Stamm
 nicht — „ja sag“ findet „Ja gesagt“ nicht, beide gehören in die Liste. Beides
 ist beim Bauen aufgefallen und steht als Test fest.
 
-**Vor dem ersten Einsatz muss `basis` in `produkte.json` gesetzt werden**, die
-Adresse der WebApp. Solange sie fehlt oder ein Platzhalter dort steht, bleibt
-die Abschluss-Slide weg und `pruefen` sagt es bei jedem Lauf. Der Rest des
-Beitrags entsteht trotzdem — eine fehlende Adresse ist kein Grund, Bilder und
-Reels aufzuhalten. Eine falsche Adresse dagegen verspricht eine Seite, die
-niemand findet, und das fällt erst auf, wenn der Beitrag schon steht.
+Die Adresse der WebApp steht als `basis` in `produkte.json` und lautet
+`https://limerence.blog`. Sie gehört dort auch in `APP_URL` — stimmen die
+beiden nicht überein, zeigt die Abschluss-Slide auf eine andere Seite als die
+Sitemap.
+
+Fehlt sie oder steht ein Platzhalter dort, bleibt die Abschluss-Slide weg und
+`pruefen` sagt es bei jedem Lauf. Der Rest des Beitrags entsteht trotzdem — eine
+fehlende Adresse ist kein Grund, Bilder und Reels aufzuhalten. Eine falsche
+Adresse dagegen verspricht eine Seite, die niemand findet, und das fällt erst
+auf, wenn der Beitrag schon steht.
 
 ## Wie die Beiträge klingen sollen
 

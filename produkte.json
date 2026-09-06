@@ -3,8 +3,8 @@
 
   "_schreibweise": "Die Felder name, frage und einladung stehen woertlich auf der Abschluss-Slide und in der Bildunterschrift. Dort gehoeren echte Umlaute hin - die ae/oe-Behelfsschreibung dieses Projekts gilt fuer Kommentare, nicht fuer Inhalt.",
 
-  "basis": "",
-  "_basis": "Die Adresse der WebApp, ohne Schraegstrich am Ende. Sie steht dort in APP_URL und ist noch nicht gesetzt, deshalb hier leer. Solange sie leer ist, weist `media-kit pruefen` jeden Beitrag mit Angebot zurueck - eine Abschluss-Slide mit unvollstaendiger Adresse waere schlimmer als keine.",
+  "basis": "https://limerence.blog",
+  "_basis": "Die Adresse der WebApp, ohne Schraegstrich am Ende. Sie gehoert dort auch in APP_URL - stimmen die beiden nicht ueberein, zeigt die Abschluss-Slide auf eine andere Seite als die Sitemap. Solange hier nichts oder ein Platzhalter steht, bleibt die Abschluss-Slide weg und `media-kit pruefen` sagt es bei jedem Lauf.",
 
   "produkte": {
     "selbsttest": {

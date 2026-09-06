@@ -83,13 +83,19 @@ jobs:
           if [ "$NEU" = "true" ]; then argumente="$argumente --neu"; fi
           python3 -m media_kit.cli rendern $argumente
 
-      # Zurueckgeschrieben wird nur auf dem Hauptzweig. Sonst sammelt jeder
-      # Zweig seine eigenen "Medien gerendert"-Commits, main und der Zweig
-      # laufen auseinander, und beim Zusammenfuehren stehen sich zwei Saetze
+      # Zurueckgeschrieben wird nur auf main. Sonst sammelt jeder Zweig seine
+      # eigenen "Medien gerendert"-Commits, main und der Zweig laufen
+      # auseinander, und beim Zusammenfuehren stehen sich zwei Saetze
       # gerenderter Binaerdateien gegenueber. Genau das ist hier passiert.
       # Auf anderen Zweigen bleibt das Artefakt - zum Ansehen reicht das.
+      #
+      # main ausdruecklich benannt und nicht ueber default_branch: das
+      # Repository wurde leer angelegt, und GitHub macht den zuerst gepushten
+      # Zweig zum Standard - hier also den Entwicklungszweig. Die Bedingung
+      # ueber default_branch griff dadurch genau verkehrt herum. seite.yml
+      # nennt main ohnehin beim Namen, jetzt tun es beide.
       - name: Ergebnis committen
-        if: github.ref_name == github.event.repository.default_branch
+        if: github.ref_name == 'main'
         env:
           ZWEIG: ${{ github.ref_name }}
         run: |

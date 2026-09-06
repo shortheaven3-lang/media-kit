@@ -22,5 +22,13 @@
     "modell": "de_DE-thorsten-high",
     "lizenz": "CC0, Thorsten-Voice-Datensatz"
   },
-  "musik": "im Programm erzeugt, keine fremden Rechte"
+  "musik": "im Programm erzeugt, keine fremden Rechte",
+  "angebot": {
+    "produkt": "selbsttest",
+    "name": "30 Tage Selbstführung",
+    "art": "eigenes",
+    "bereich": "grenzen",
+    "adresse": "https://limerence.blog/test/grenzen",
+    "zugeordnet_ueber": "nein, ja gesagt"
+  }
 }

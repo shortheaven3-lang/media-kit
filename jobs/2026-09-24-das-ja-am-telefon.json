@@ -1,0 +1,38 @@
+{
+  "id": "2026-09-24-das-ja-am-telefon",
+  "marke": "shortheaven3",
+  "termin": "2026-09-24T05:30:00+02:00",
+  "ausgaben": ["reel", "karussell"],
+  "notiz": "Szene statt Begriff. Die Einschränkung im vorletzten Absatz ist Absicht — ohne sie wäre es ein Ratgebersatz.",
+  "slides": [
+    {
+      "typ": "haken",
+      "titel": "Ich habe Ja gesagt, bevor die Frage zu Ende war."
+    },
+    {
+      "typ": "inhalt",
+      "text": "Am Telefon, Donnerstag, halb sechs. Ich wusste beim Sprechen, dass es falsch war."
+    },
+    {
+      "typ": "inhalt",
+      "kopf": "Warum trotzdem",
+      "text": "Ein Nein hätte drei Sekunden Stille gebraucht. Die drei Sekunden waren mir unangenehmer als der ganze Samstag, den ich damit verkauft habe."
+    },
+    {
+      "typ": "inhalt",
+      "text": "Ich sage das nicht, um mich zu belehren. Ich hätte es diese Woche vermutlich wieder getan."
+    },
+    {
+      "typ": "inhalt",
+      "kopf": "Was hilft",
+      "text": "Ein Satz, der vorher schon fertig ist. „Ich sag dir heute Abend Bescheid.“ Er kostet keine Stille und kauft eine Stunde."
+    },
+    {
+      "typ": "ende",
+      "merksatz": "Zwischen der Frage und dem Ja liegt der ganze Samstag."
+    }
+  ],
+  "caption": "Donnerstag, halb sechs, am Telefon. Ich habe Ja gesagt, bevor die Frage zu Ende war, und beim Sprechen schon gewusst, dass es falsch ist.\n\nDie Rechnung dahinter ist absurd, wenn man sie einmal aufschreibt: Ein Nein hätte drei Sekunden Stille gekostet. Das Ja hat einen Samstag gekostet. Ich habe die drei Sekunden für teurer gehalten.\n\nIch schreibe das nicht als Ratschlag. Diese Woche hätte ich es vermutlich wieder getan.\n\nWas bei mir wirklich hilft, ist kein Nein, sondern ein Satz, der schon fertig ist, bevor jemand fragt: Ich sag dir heute Abend Bescheid. Der kostet keine Stille, und in der Stunde danach fällt die Antwort von allein.\n\nBei welcher Frage sagst du zu schnell Ja?",
+  "ton": {"stimme": true, "musik": true, "stimmung": "Die Frage"},
+  "video": {"slidedauer": 4.0}
+}

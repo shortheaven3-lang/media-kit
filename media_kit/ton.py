@@ -40,6 +40,18 @@ SR = 44100
 PAUSE_NACH_SATZ = 0.75      # Sekunden Stille hinter jeder gesprochenen Slide
 MINDESTSTAND = 2.4          # so lange steht eine Slide mindestens
 
+# Prosodie. Piper erzeugt je Aufruf genau eine Sprechmelodie. Wirft man ihm
+# einen ganzen Absatz hin, bekommt man einen einzigen, gleichmaessig
+# durchlaufenden Bogen - und genau das klingt nach Maschine. Satz fuer Satz
+# erzeugt bekommt jeder Satz seine eigene Melodie, und dazwischen darf
+# geschwiegen werden.
+PAUSE_SATZ = 0.40           # Stille zwischen zwei Saetzen
+PAUSE_FRAGE = 0.55          # nach einer Frage laenger - sie will nachhallen
+PAUSE_DOPPELPUNKT = 0.28    # ein Doppelpunkt kuendigt an, das braucht Luft
+VORLAUF = 0.12              # Stille am Anfang, sonst klemmt der erste Laut
+TEMPO_STREUUNG = 0.07       # +/- 7 % Sprechtempo je Satz
+TEMPO_GRUND = 1.18          # etwas langsamer als die Voreinstellung
+
 
 # ------------------------------------------------------------------ Werkzeug
 def _tiefpass(x: np.ndarray, grenze: float, ordnung: int = 2) -> np.ndarray:
@@ -192,8 +204,45 @@ def musik(dauer: float, stimmung: dict | None = None, seed: int = 0) -> np.ndarr
 
 
 # ------------------------------------------------------------------- Stimme
-QUELLE = ("https://huggingface.co/rhasspy/piper-voices/resolve/main/"
-          "de/de_DE/thorsten/medium/")
+import re    # noqa: E402  - erst hier gebraucht
+import zlib  # noqa: E402
+
+# Trennt an Satzzeichen, laesst das Zeichen aber am Satz. Abkuerzungen wie
+# "z. B." oder "Dr." wuerden hier faelschlich trennen; sie kommen in diesen
+# Texten nicht vor, und ein halber Satz mehr Pause waere das kleinere Uebel
+# gegenueber einem Regelwerk, das niemand mehr durchschaut.
+SATZTRENNER = re.compile(r"(?<=[.!?\u2026])\s+")
+
+
+def saetze_aus(text: str) -> list[str]:
+    return [t.strip() for t in SATZTRENNER.split(text or "") if t.strip()]
+
+
+def _pause_nach(satz: str) -> float:
+    """Wie lange nach diesem Satz geschwiegen wird."""
+    ende = satz.rstrip()[-1:] if satz.strip() else ""
+    if ende == "?":
+        return PAUSE_FRAGE
+    if ende == ":":
+        return PAUSE_DOPPELPUNKT
+    return PAUSE_SATZ
+
+
+def _tempo(satz: str) -> float:
+    """Sprechtempo fuer diesen Satz, leicht schwankend.
+
+    Gleichmaessiges Tempo ueber alle Saetze ist das zweite, was maschinell
+    klingt. Die Schwankung haengt am Satz selbst und nicht am Zufall - damit
+    derselbe Text zweimal gleich klingt und das Zwischenlager gilt.
+    """
+    # Nicht hash(): Pythons Zeichenketten-Hash ist je Prozess zufaellig
+    # gesalzen. Derselbe Satz bekaeme bei jedem Lauf ein anderes Tempo, das
+    # Zwischenlager waere wertlos und zwei Renderlaeufe klaengen verschieden.
+    stelle = zlib.crc32(satz.encode("utf-8")) % 1000 / 1000.0
+    return TEMPO_GRUND * (1 + (stelle - 0.5) * 2 * TEMPO_STREUUNG)
+
+
+BESTAND = "https://huggingface.co/rhasspy/piper-voices/resolve/main"
 
 
 def modell(name: str, lager: Path) -> tuple[Path, Path] | None:
@@ -206,67 +255,118 @@ def modell(name: str, lager: Path) -> tuple[Path, Path] | None:
 
     ordner = lager / "stimmen"
     ordner.mkdir(parents=True, exist_ok=True)
+    guete = name.rsplit("-", 1)[-1] if "-" in name else "medium"
+    sprecher = name.split("-")[1] if name.count("-") >= 2 else "thorsten"
+    quelle = f"{BESTAND}/de/de_DE/{sprecher}/{guete}/"
+
     pfade = []
     for endung in (".onnx", ".onnx.json"):
         ziel = ordner / f"{name}{endung}"
         if not ziel.exists() or ziel.stat().st_size == 0:
             try:
                 anfrage = urllib.request.Request(
-                    f"{QUELLE}{name}{endung}?download=true",
+                    f"{quelle}{name}{endung}?download=true",
                     headers={"User-Agent": "media-kit/1.0"},
                 )
-                with urllib.request.urlopen(anfrage, timeout=120) as antwort:
+                with urllib.request.urlopen(anfrage, timeout=180) as antwort:
                     roh = antwort.read()
                 neben = ziel.with_suffix(ziel.suffix + ".teil")
                 neben.write_bytes(roh)
                 neben.replace(ziel)
             except Exception as fehler:
-                print(f"  Stimmmodell nicht geladen ({type(fehler).__name__}: {fehler})")
+                print(f"  Stimmmodell {name} nicht geladen "
+                      f"({type(fehler).__name__}: {fehler})")
                 return None
         pfade.append(ziel)
     return pfade[0], pfade[1]
 
 
-def sprechen(saetze: list[str], stimmname: str, lager: Path) -> list[np.ndarray] | None:
-    """Ein Sprachclip je Satz, mono float32 bei 44 100 Hz. None heisst: keine Stimme."""
-    dateien = modell(stimmname, lager)
-    if not dateien:
-        return None
+def _stimme_laden(namen: list[str], lager: Path):
+    """Probiert die Modelle der Reihe nach und nimmt das erste, das laedt.
+
+    Ein hoeher aufgeloestes Modell klingt besser, ist aber groesser und nicht
+    fuer jeden Sprecher vorhanden. Ohne Rueckfall bekaeme man fuer einen
+    Tippfehler im Modellnamen ein stummes Reel - und wuerde lange suchen,
+    warum.
+    """
     try:
-        from piper import PiperVoice, SynthesisConfig
+        from piper import PiperVoice
+    except Exception as fehler:
+        print(f"  piper nicht verfuegbar ({type(fehler).__name__}: {fehler})")
+        return None, ""
+
+    for name in namen:
+        dateien = modell(name, lager)
+        if not dateien:
+            continue
+        try:
+            return PiperVoice.load(str(dateien[0]), str(dateien[1])), name
+        except Exception as fehler:
+            print(f"  {name} nicht ladbar ({type(fehler).__name__}: {fehler})")
+    return None, ""
+
+
+def sprechen(saetze: list[str], stimmname: str, lager: Path,
+             rueckfall: list[str] | None = None) -> list[np.ndarray] | None:
+    """Ein Sprachclip je Slide, mono float32 bei 44 100 Hz.
+
+    Jede Slide wird nicht am Stueck gesprochen, sondern Satz fuer Satz, und
+    dazwischen wird geschwiegen. Das ist der ganze Unterschied zwischen
+    "vorgelesen" und "abgespielt": Piper erzeugt je Aufruf eine Sprechmelodie,
+    und ein ganzer Absatz bekommt davon nur eine einzige.
+
+    None heisst: keine Stimme, das Reel laeuft stumm weiter.
+    """
+    try:
+        from piper import SynthesisConfig
     except Exception as fehler:
         print(f"  piper nicht verfuegbar ({type(fehler).__name__}: {fehler})")
         return None
-    try:
-        voice = PiperVoice.load(str(dateien[0]), str(dateien[1]))
-        # Etwas langsamer als die Voreinstellung. Die Saetze sind kurz und
-        # sollen nicht gehetzt klingen.
-        konf = SynthesisConfig(length_scale=1.18, noise_scale=0.6, noise_w_scale=0.75)
-    except Exception as fehler:
-        print(f"  Stimme nicht geladen ({type(fehler).__name__}: {fehler})")
+
+    kandidaten = [stimmname] + [n for n in (rueckfall or []) if n != stimmname]
+    voice, genommen = _stimme_laden(kandidaten, lager)
+    if voice is None:
         return None
+    if genommen != stimmname:
+        print(f"  Stimme {stimmname} nicht verfuegbar - genommen wird {genommen}")
 
     clips = []
-    for satz in saetze:
-        if not satz.strip():
+    for text in saetze:
+        teile = saetze_aus(text)
+        if not teile:
             clips.append(np.zeros(0, np.float32))
             continue
-        puffer = io.BytesIO()
-        try:
-            with wave.open(puffer, "wb") as w:
-                voice.synthesize_wav(satz, w, syn_config=konf)
-        except Exception as fehler:
-            print(f"  Satz nicht gesprochen ({type(fehler).__name__}: {fehler})")
-            return None
-        puffer.seek(0)
-        with wave.open(puffer, "rb") as w:
-            roh = w.readframes(w.getnframes())
-            kanaele, rate = w.getnchannels(), w.getframerate()
-        x = np.frombuffer(roh, np.int16).astype(np.float32) / 32768.0
-        if kanaele > 1:
-            x = x.reshape(-1, kanaele).mean(axis=1)
-        clips.append(_umtasten(x, rate))
+
+        stueck = [np.zeros(int(VORLAUF * SR), np.float32)]
+        for i, satz in enumerate(teile):
+            gesprochen = _einen_satz(voice, satz, SynthesisConfig)
+            if gesprochen is None:
+                return None
+            stueck.append(gesprochen)
+            if i < len(teile) - 1:
+                stueck.append(np.zeros(int(_pause_nach(satz) * SR), np.float32))
+        clips.append(np.concatenate(stueck))
     return clips
+
+
+def _einen_satz(voice, satz: str, SynthesisConfig) -> np.ndarray | None:
+    konf = SynthesisConfig(length_scale=_tempo(satz),
+                           noise_scale=0.6, noise_w_scale=0.75)
+    puffer = io.BytesIO()
+    try:
+        with wave.open(puffer, "wb") as w:
+            voice.synthesize_wav(satz, w, syn_config=konf)
+    except Exception as fehler:
+        print(f"  Satz nicht gesprochen ({type(fehler).__name__}: {fehler})")
+        return None
+    puffer.seek(0)
+    with wave.open(puffer, "rb") as w:
+        roh = w.readframes(w.getnframes())
+        kanaele, rate = w.getnchannels(), w.getframerate()
+    x = np.frombuffer(roh, np.int16).astype(np.float32) / 32768.0
+    if kanaele > 1:
+        x = x.reshape(-1, kanaele).mean(axis=1)
+    return _umtasten(x, rate)
 
 
 # ------------------------------------------------------------------ Mischen

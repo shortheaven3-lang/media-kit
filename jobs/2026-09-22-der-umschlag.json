@@ -1,0 +1,37 @@
+{
+  "id": "2026-09-22-der-umschlag",
+  "marke": "shortheaven3",
+  "termin": "2026-09-22T05:30:00+02:00",
+  "ausgaben": ["reel", "karussell"],
+  "notiz": "Nach der Stimmführung geschrieben: eine Szene mit einem Gegenstand, eine zugegebene Grenze, unregelmäßiger Takt, am Ende eine Frage ohne vorgesehene Antwort.",
+  "slides": [
+    {
+      "typ": "haken",
+      "titel": "Auf meinem Schreibtisch liegt seit elf Tagen ein Umschlag."
+    },
+    {
+      "typ": "inhalt",
+      "text": "Ich habe ihn jeden Morgen gesehen. Jeden Morgen habe ich gedacht: gleich."
+    },
+    {
+      "typ": "inhalt",
+      "text": "Aufmachen dauert vierzig Sekunden. Das weiß ich, weil ich es gestern gemacht habe."
+    },
+    {
+      "typ": "inhalt",
+      "kopf": "Die Rechnung",
+      "text": "Elf Tage lang nicht aufmachen hat mich jeden Morgen etwas gekostet. Nicht viel. Aber jeden Morgen."
+    },
+    {
+      "typ": "inhalt",
+      "text": "Warum das so ist, weiß ich nicht. Ich weiß nur: Der Umschlag ist in elf Tagen nicht schwerer geworden."
+    },
+    {
+      "typ": "ende",
+      "merksatz": "Das Aufschieben wiegt mehr als die Sache."
+    }
+  ],
+  "caption": "Auf meinem Schreibtisch lag elf Tage lang ein Umschlag. Ich habe ihn jeden Morgen gesehen und jeden Morgen gedacht: gleich.\n\nGestern habe ich ihn aufgemacht. Vierzig Sekunden.\n\nDas Verhältnis stimmt in keiner Richtung, und trotzdem passiert es. Ich glaube nicht, dass es an Disziplin liegt — die vierzig Sekunden hätte ich an jedem der elf Tage gehabt. Es liegt eher daran, dass eine ungeöffnete Sache größer aussieht als eine geöffnete, und dass man ihr diese Größe glaubt.\n\nDas gilt nicht für alles. Manches schiebt man auf, weil es tatsächlich groß ist.\n\nWas liegt bei dir gerade herum, das in Wahrheit vierzig Sekunden dauert?",
+  "ton": {"stimme": true, "musik": true, "stimmung": "Das Ritual"},
+  "video": {"slidedauer": 4.0}
+}

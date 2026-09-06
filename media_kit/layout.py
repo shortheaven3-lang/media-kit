@@ -73,6 +73,15 @@ def rumpf(slide: dict, nummer: int, gesamt: int, marke: Marke) -> tuple[str, str
         if abbinder:
             block += f"<div class='abbinder'>{sicher(abbinder)}</div>"
 
+    elif typ == "angebot":
+        # Kein Verkauf, ein Angebot: erst die Frage, die den Leser meint, dann
+        # was dahintersteckt, dann die Adresse. Umgekehrt liest es niemand.
+        block = f"<div class='frage'>{sicher(slide['frage'])}</div>"
+        if slide.get("einladung"):
+            block += f"<div class='einladung'>{sicher(slide['einladung'])}</div>"
+        if slide.get("adresse"):
+            block += f"<div class='adresse'>{sicher(slide['adresse'])}</div>"
+
     elif typ == "zitat":
         block = f"<div class='fliess'>{absaetze(slide['text'])}</div>"
         if slide.get("herkunft"):
@@ -90,7 +99,7 @@ def rumpf(slide: dict, nummer: int, gesamt: int, marke: Marke) -> tuple[str, str
     # Einzelbild. "03 / 07" auf einem Einzelbild verspricht sechs Slides, die
     # es nicht gibt.
     zaehler = ""
-    if gesamt > 1 and typ != "ende":
+    if gesamt > 1 and typ not in ("ende", "angebot"):
         zaehler = f"<div class='zaehler'>{nummer:02d} / {gesamt:02d}</div>"
 
     return typ, zaehler + block

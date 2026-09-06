@@ -19,6 +19,7 @@ import json
 import sys
 from pathlib import Path
 
+from . import angebot as angebot_modul
 from . import formate, job as job_modul, marke, quellen, werk
 from .zwischenlager import Lager
 
@@ -44,7 +45,7 @@ def befehl_pruefen(args) -> int:
     if not dateien:
         print("Keine Job-Datei angegeben oder gefunden.")
         return 1
-    fehler = 0
+    fehler = warnungen = 0
     for datei in dateien:
         try:
             daten = json.loads(datei.read_text(encoding="utf-8"))
@@ -60,8 +61,46 @@ def befehl_pruefen(args) -> int:
         else:
             print(f"  {datei.name}: in Ordnung "
                   f"({len(daten['slides'])} Slides -> {', '.join(daten['ausgaben'])})")
+            # Ein fehlendes Angebot ist eine Warnung, kein Fehler. Bilder und
+            # Reels sind davon unberuehrt, und die ganze Produktion an einer
+            # noch nicht vergebenen Adresse aufzuhalten waere unverhaeltnismaessig.
+            hinweis = _angebot_pruefen(daten, datei.name)
+            if hinweis:
+                warnungen += 1
+                print(f"      ohne Abschluss-Slide: {hinweis}")
     print(f"\n{len(dateien) - fehler} von {len(dateien)} renderbar.")
+    if warnungen:
+        print(f"{warnungen} davon ohne Abschluss-Slide.")
     return 1 if fehler else 0
+
+
+def _angebot_pruefen(daten: dict, name: str) -> str:
+    """Meldet, wenn ein Beitrag ein Angebot bekaeme, das nicht gebaut werden kann.
+
+    Die Pruefung laeuft im Workflow vor dem Rendern. Genau dorthin gehoert
+    dieser Fehler: eine fehlende Basisadresse faellt sonst erst auf, wenn der
+    Browser schon laeuft und die halbe Arbeit getan ist.
+    """
+    try:
+        auftrag = job_modul.Job(
+            id=daten["id"], marke=daten["marke"], slides=daten["slides"],
+            ausgaben=daten["ausgaben"], caption=daten.get("caption", ""),
+            rubrik=daten.get("rubrik", ""), notiz=daten.get("notiz", ""),
+            angebot=daten.get("angebot"),
+        )
+        m = marke.laden(daten["marke"])
+    except SystemExit as fehler:
+        return str(fehler)
+
+    will, bereich = angebot_modul.gewuenscht(auftrag, m)
+    if not will:
+        return ""
+    try:
+        angebot_modul.zuordnen(auftrag, produkt=(m.angebot or {}).get("produkt", "selbsttest"),
+                               bereich=bereich)
+    except angebot_modul.AngebotFehler as fehler:
+        return str(fehler)
+    return ""
 
 
 def befehl_rendern(args) -> int:

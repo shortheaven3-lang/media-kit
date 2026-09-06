@@ -33,6 +33,10 @@ SLIDE_TYPEN: dict[str, tuple[set[str], set[str]]] = {
     "zitat":  ({"text"},     {"herkunft"} | _BILD),
     "frage":  ({"text"},     {"kopf"} | _BILD),
     "ende":   ({"merksatz"}, {"abbinder"} | _BILD),
+    # Die Abschluss-Slide wird vom Programm angehaengt, nicht von Hand
+    # geschrieben. Sie steht hier, damit ein von Hand gesetzter Eintrag
+    # dieselbe Pruefung durchlaeuft.
+    "angebot": ({"frage"},   {"einladung", "adresse"} | _BILD),
 }
 
 SLUG = re.compile(r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
@@ -54,6 +58,9 @@ class Job:
     ton: dict = field(default_factory=dict)
     video: dict = field(default_factory=dict)
     notiz: str = ""
+    # True = Angebot anhaengen und Bereich selbst suchen, ein Bereichsname =
+    # diesen nehmen, False = keins. None = die Marke entscheidet.
+    angebot: bool | str | None = None
     quelle: Path | None = None
 
     # ------------------------------------------------------------- Bequemes
@@ -97,6 +104,7 @@ class Job:
             "termin": self.termin, "ausgaben": self.ausgaben,
             "slides": self.slides, "caption": self.caption,
             "ton": self.ton, "video": self.video, "notiz": self.notiz,
+            "angebot": self.angebot,
         }
         return json.dumps({k: v for k, v in daten.items() if v not in ("", {}, [])},
                           ensure_ascii=False, indent=2)
@@ -149,6 +157,10 @@ def pruefen(daten: dict, herkunft: str = "<unbekannt>") -> list[str]:
             datetime.fromisoformat(str(termin))
         except ValueError:
             an(f"'termin' ist kein ISO-Zeitpunkt: {termin!r} (erwartet 2026-09-12T06:30:00+02:00)")
+
+    wunsch = daten.get("angebot")
+    if wunsch is not None and not isinstance(wunsch, (bool, str)):
+        an(f"'angebot' muss true, false oder ein Bereichsname sein, ist aber {wunsch!r}")
 
     video = daten.get("video") or {}
     if video:
@@ -203,5 +215,6 @@ def laden(pfad: str | Path) -> Job:
         ton=daten.get("ton", {}),
         video=daten.get("video", {}),
         notiz=daten.get("notiz", ""),
+        angebot=daten.get("angebot"),
         quelle=pfad,
     )

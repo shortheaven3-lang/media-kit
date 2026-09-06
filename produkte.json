@@ -1,0 +1,54 @@
+{
+  "_warum": "Ein Beitrag, der nichts anbietet, verdient nichts. Ein Beitrag, der etwas verkauft, wird weggewischt. Dazwischen liegt der Selbsttest: er redet ueber den Leser statt ueber das Produkt, kostet nichts und verlangt keine E-Mail-Adresse. Wer sein Ergebnis gelesen hat, nimmt die drei freien Tage deutlich eher als jemand, der auf einer Verkaufsseite landet - das steht so schon im README der WebApp.",
+
+  "_schreibweise": "Die Felder name, frage und einladung stehen woertlich auf der Abschluss-Slide und in der Bildunterschrift. Dort gehoeren echte Umlaute hin - die ae/oe-Behelfsschreibung dieses Projekts gilt fuer Kommentare, nicht fuer Inhalt.",
+
+  "basis": "",
+  "_basis": "Die Adresse der WebApp, ohne Schraegstrich am Ende. Sie steht dort in APP_URL und ist noch nicht gesetzt, deshalb hier leer. Solange sie leer ist, weist `media-kit pruefen` jeden Beitrag mit Angebot zurueck - eine Abschluss-Slide mit unvollstaendiger Adresse waere schlimmer als keine.",
+
+  "produkte": {
+    "selbsttest": {
+      "name": "30 Tage Selbstführung",
+      "art": "eigenes",
+      "_art": "eigenes oder fremdes. Fuer eigene Angebote im eigenen Kanal gilt keine gesonderte Kennzeichnungspflicht wie fuer bezahlte Fremdwerbung - erkennbar sein muss es trotzdem, und das ist es: die Slide sagt, was es ist und was es kostet (naemlich nichts).",
+
+      "einstieg": "/test",
+      "einladung": "Zwölf Aussagen, zwei Minuten, keine E-Mail-Adresse.",
+
+      "bereiche": {
+        "sehen": {
+          "adresse": "/test/sehen",
+          "frage": "Merkst du es erst, wenn der Tag vorbei ist?",
+          "schlagworte": ["aufmerksam", "merk", "wahrnehm", "autopilot", "durchrutsch",
+                          "unbemerkt", "achtsam", "erinner", "gedaechtnis", "gedächtnis",
+                          "uebersehen", "übersehen", "bemerk", "auffall", "beobacht"]
+        },
+        "grenzen": {
+          "adresse": "/test/grenzen",
+          "frage": "Hörst du dich Ja sagen und denkst gleichzeitig: warum jetzt?",
+          "_beugung": "Auch gebeugte Formen gehoeren in die Liste. 'ja sag' findet 'Ja gesagt' nicht - der Stamm allein reicht bei zusammengesetzten Wendungen nicht aus.",
+          "schlagworte": ["nein", "ja sag", "ja gesagt", "zugesagt", "nein sag",
+                          "grenze", "gefallen", "ueberford", "überford", "zusag",
+                          "absag", "abgeb", "delegier", "erwartung", "pflicht",
+                          "muessen", "müssen", "verpflicht", "gefaellig", "gefällig"]
+        },
+        "handeln": {
+          "adresse": "/test/handeln",
+          "frage": "Weißt du es und tust es trotzdem nicht?",
+          "_schlagworte": "Wortstaemme, keine Vollformen. Deutsche trennbare Verben zerfallen im Satz: 'aufschieben' steht als 'schiebst es auf' da und wird von der Vollform nie gefunden. Deshalb 'schieb' statt 'aufschieb'.",
+          "schlagworte": ["schieb", "anfang", "gewohnheit", "vorsatz", "disziplin",
+                          "durchhalt", "willenskraft", "motivation", "umsetz",
+                          "handeln", "entscheid", "zoeger", "zöger", "prokrastin",
+                          "routine", "wiederhol", "morgen", "spaeter", "später"]
+        },
+        "loslassen": {
+          "adresse": "/test/loslassen",
+          "frage": "Hältst du fest, was längst vorbei ist?",
+          "schlagworte": ["gruebel", "grübel", "kontroll", "perfekt", "loslass",
+                          "festhalt", "vergangen", "reue", "hader", "vergleich",
+                          "sorge", "abschied", "nachtrag", "bereu", "ruminier"]
+        }
+      }
+    }
+  }
+}

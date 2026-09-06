@@ -17,6 +17,11 @@
   },
   "schriftdateien": ["Archivo", "Inter", "JetBrainsMono"],
   "abbinder": "@denkbeleg",
+  "angebot": {
+    "an": true,
+    "produkt": "selbsttest",
+    "_warum": "Ein Beitrag ohne Verweis verdient nichts. Der Verweis geht auf den Selbsttest, nicht auf die Verkaufsseite: er redet ueber den Leser statt ueber das Produkt und kostet nichts. Einzelne Beitraege koennen ihn mit \"angebot\": false abschalten - nicht jeder Text vertraegt einen."
+  },
   "standardformate": ["karussell"],
 
   "bildklima": {
@@ -25,7 +30,9 @@
   },
 
   "ton": {
-    "stimme": "de_DE-thorsten-medium",
+    "stimme": "de_DE-thorsten-high",
+    "rueckfall": ["de_DE-thorsten-medium"],
+    "_stimme_warum": "high klingt hoerbar weniger flach als medium und ist einmal 110 MB statt 60 - im Zwischenlager der Action faellt das nicht ins Gewicht. Der Rueckfall steht daneben, weil ein fehlendes Modell sonst ein stummes Reel ergibt und man lange sucht, warum.",
     "stimme_lizenz": "CC0, Thorsten-Voice-Datensatz",
     "musik": "eigen",
     "stimmungen": {

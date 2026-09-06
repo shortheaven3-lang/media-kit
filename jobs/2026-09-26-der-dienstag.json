@@ -1,0 +1,38 @@
+{
+  "id": "2026-09-26-der-dienstag",
+  "marke": "shortheaven3",
+  "termin": "2026-09-26T05:30:00+02:00",
+  "ausgaben": ["reel", "karussell"],
+  "notiz": "Dritter Beitrag der Reihe, bewusst anders gebaut als die beiden davor — beginnt mit einer Handlung statt mit einer Feststellung, damit die drei nicht als Schema auffallen.",
+  "slides": [
+    {
+      "typ": "haken",
+      "titel": "Ich bin in der Fotogalerie nach oben gewischt, bis ein Dienstag kam, den ich nicht kannte."
+    },
+    {
+      "typ": "inhalt",
+      "text": "Zwei Bilder. Ein Parkplatz, ein Kaffee. Vom Tag dazwischen ist nichts übrig."
+    },
+    {
+      "typ": "inhalt",
+      "kopf": "Es war kein schlechter Tag",
+      "text": "Ich habe gearbeitet, gegessen, geredet. Nichts davon hat sich gemerkt."
+    },
+    {
+      "typ": "inhalt",
+      "text": "Woran ich mich erinnere, sind fast immer Stellen, an denen etwas nicht glatt lief. Der Rest rutscht durch."
+    },
+    {
+      "typ": "inhalt",
+      "kopf": "Seitdem",
+      "text": "Abends ein Satz auf einen Zettel. Nicht als Tagebuch. Nur, damit der Dienstag eine Handschrift hat."
+    },
+    {
+      "typ": "ende",
+      "merksatz": "Ein Tag ohne Widerstand hinterlässt keine Spur."
+    }
+  ],
+  "caption": "Ich bin durch die Fotogalerie nach oben gewischt und bei einem Dienstag hängen geblieben, den ich nicht kannte. Zwei Bilder: ein Parkplatz, ein Kaffee. Dazwischen ein ganzer Tag, von dem nichts übrig ist.\n\nEs war kein schlechter Tag. Ich habe gearbeitet, gegessen, mit Leuten geredet. Nur gemerkt hat sich davon nichts.\n\nWenn ich nachdenke, erinnere ich fast nur Stellen, an denen etwas gehakt hat — ein Streit, ein Fehler, eine Verspätung. Was reibungslos lief, ist weg. Ich weiß nicht, ob das bei allen so ist; ich kann nur für meine Fotogalerie sprechen.\n\nSeitdem schreibe ich abends einen Satz auf einen Zettel. Nicht als Tagebuch, dafür bin ich zu unregelmäßig. Nur damit der Dienstag eine Handschrift hat.\n\nWas war letzten Dienstag?",
+  "ton": {"stimme": true, "musik": true, "stimmung": "Die Stille"},
+  "video": {"slidedauer": 4.0}
+}

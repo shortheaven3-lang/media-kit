@@ -124,6 +124,18 @@
         "bildnachweis",
         "motiv"
       ]
+    },
+    "angebot": {
+      "pflicht": [
+        "frage"
+      ],
+      "erlaubt": [
+        "adresse",
+        "bild",
+        "bildnachweis",
+        "einladung",
+        "motiv"
+      ]
     }
   },
   "marken": {

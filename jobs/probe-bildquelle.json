@@ -1,8 +1,11 @@
 {
   "id": "probe-bildquelle",
   "marke": "shortheaven3",
-  "notiz": "Prueft beide Wege zum Hintergrundbild in einem Lauf. Slide 1 nimmt eine feste Pexels-Adresse - der vorgesehene Weg: beim Redigieren ausgesucht, im Renderlauf nur noch geholt, ohne Schluessel und ohne Zufall. Slide 2 laesst suchen; ohne PEXELS_API_KEY faellt die Kette auf Wikimedia Commons durch.",
-  "ausgaben": ["story", "karussell"],
+  "notiz": "Prueft beide Wege zum Hintergrundbild in einem Lauf. Slide 1 nimmt eine feste Pexels-Adresse - der vorgesehene Weg: beim Redigieren ausgesucht, im Renderlauf nur noch geholt, ohne Schluessel und ohne Zufall. Slide 2 laesst suchen; ohne PEXELS_API_KEY faellt die Kette auf Wikimedia Commons durch. Kein Angebot: das ist ein technischer Probelauf, kein Beitrag.",
+  "ausgaben": [
+    "story",
+    "karussell"
+  ],
   "slides": [
     {
       "typ": "haken",
@@ -22,5 +25,6 @@
       "motiv": "calm sea horizon dusk"
     }
   ],
-  "caption": "Probelauf der Bildquellen: feste Adresse und Suche."
+  "caption": "Probelauf der Bildquellen: feste Adresse und Suche.",
+  "angebot": false
 }

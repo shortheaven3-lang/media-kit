@@ -104,3 +104,30 @@ mark { background: linear-gradient(transparent 12%, var(--marker) 12% 88%, trans
   font-size: 4rem; line-height: 1.16; max-width: 100%; margin-bottom: 0;
 }
 .quer .unterzeile, .quer .abbinder { margin-top: 2rem; font-size: 1.75rem; }
+
+/* ---------------------------------------------------------------- Angebot
+   Die Abschluss-Slide. Sie soll nach Einladung aussehen, nicht nach Anzeige:
+   dieselbe Schrift, dasselbe Papier, nur der Marker macht die Frage zur
+   Frage. Ein Kasten mit Rahmen und Signalfarbe wuerde sofort als Werbung
+   gelesen und weggewischt. */
+/* Die Adresse gehoert nach unten, wie die Quellenzeile auf den Inhaltsslides.
+   Ihr margin-top:auto schluckt aber den ganzen freien Raum und hebelt damit
+   jedes justify-content aus - die Frage klebte dann oben am Rand. Zwei
+   automatische Abstaende teilen den Raum stattdessen unter sich auf: die Frage
+   steht im oberen Drittel, die Adresse unten. */
+.typ-angebot .frage { margin-top: auto; }
+.typ-angebot .frage {
+  font-family: var(--schrift-titel), sans-serif; font-weight: 700;
+  font-size: 3.75rem; line-height: 1.18; letter-spacing: -.018em;
+  max-width: 52rem;
+}
+.typ-angebot .einladung {
+  margin-top: 2.75rem; font-size: 2.125rem; line-height: 1.45;
+  color: var(--neben); max-width: 44rem;
+}
+.typ-angebot .adresse {
+  margin-top: auto; padding-top: 2.25rem;
+  border-top: 1px solid rgba(22,25,29,.16);
+  font-family: var(--schrift-technisch), monospace;
+  font-size: 1.75rem; letter-spacing: .01em; color: var(--tinte);
+}

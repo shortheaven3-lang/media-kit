@@ -79,6 +79,15 @@ python3 -m media_kit.cli rendern jobs/2026-09-20-testeffekt.json
 Für die Sprachausgabe zusätzlich `pip install -r requirements-stimme.txt`.
 Ohne sie läuft alles weiter, die Reels bleiben nur stumm.
 
+Gesprochen wird **Satz für Satz, nicht Absatz am Stück**. Piper erzeugt je
+Aufruf genau eine Sprechmelodie; wirft man ihm einen ganzen Absatz hin, bekommt
+man einen einzigen durchlaufenden Bogen, und genau das klingt nach Maschine.
+Satzweise erzeugt bekommt jeder Satz seine eigene Melodie, dazwischen wird
+geschwiegen — nach einer Frage länger als nach einer Aussage —, und das Tempo
+schwankt um sieben Prozent. Die Schwankung hängt am Satz selbst, nicht am
+Zufall: derselbe Text klingt bei jedem Lauf gleich, sonst wäre das
+Zwischenlager wertlos.
+
 Weitere Befehle:
 
 ```bash
@@ -137,6 +146,68 @@ Ohne Angabe bekommt ein Video Ton und ein Karussell nicht.
 Reel und Story rechnen mit Sicherheitszonen: oben rund 140 Pixel Profilzeile,
 unten rund 330 Pixel Bildunterschrift und Schaltflächen. Wer sie ignoriert,
 setzt den Merksatz unter den Folgen-Knopf.
+
+## Das Angebot am Ende
+
+Ein Beitrag, der nichts anbietet, verdient nichts. Ein Beitrag, der etwas
+verkauft, wird weggewischt. Dazwischen liegt der Selbsttest: er redet über den
+Leser statt über das Produkt, kostet nichts und verlangt keine E-Mail-Adresse.
+
+Deshalb hängt das Programm an jeden Beitrag eine **Abschluss-Slide** in der
+Bildsprache der Marke — nicht in der Job-Datei geschrieben, sondern angehängt,
+damit sie nicht vergessen wird. Beim Redigieren denkt niemand an den Verweis.
+
+Welcher der vier Testbereiche gilt, entscheidet das Thema: `produkte.json`
+ordnet jedem Bereich Schlagworte zu, und der Beitrag landet dort, wo er die
+meisten trifft.
+
+```
+2026-09-22-der-umschlag        -> handeln    (schieb, disziplin, morgen)
+2026-09-24-das-ja-am-telefon   -> grenzen    (nein, ja gesagt)
+2026-09-26-der-dienstag        -> sehen      (merk, erinner, auffall)
+```
+
+Ein einzelner Treffer reicht nicht — das wäre Zufall. Unter zwei Treffern gibt
+es den allgemeinen Einstieg statt eines schlecht geratenen Bereichs: ein
+unpassendes Angebot ist schädlicher als ein allgemeines, weil es zeigt, dass
+niemand hingesehen hat.
+
+Steuerung je Beitrag:
+
+| `angebot` | Wirkung |
+|---|---|
+| fehlt | die Marke entscheidet |
+| `true` | anhängen, Bereich selbst suchen |
+| `"grenzen"` | anhängen, diesen Bereich nehmen |
+| `false` | keins — nicht jeder Text verträgt einen Verweis |
+
+**Die Schlagworte sind Wortstämme, keine Vollformen.** Deutsche trennbare Verben
+zerfallen im Satz: „aufschieben“ steht als „schiebst es auf“ da und wird von der
+Vollform nie gefunden. Bei zusammengesetzten Wendungen reicht auch der Stamm
+nicht — „ja sag“ findet „Ja gesagt“ nicht, beide gehören in die Liste. Beides
+ist beim Bauen aufgefallen und steht als Test fest.
+
+**Vor dem ersten Einsatz muss `basis` in `produkte.json` gesetzt werden**, die
+Adresse der WebApp. Solange sie fehlt oder ein Platzhalter dort steht, bleibt
+die Abschluss-Slide weg und `pruefen` sagt es bei jedem Lauf. Der Rest des
+Beitrags entsteht trotzdem — eine fehlende Adresse ist kein Grund, Bilder und
+Reels aufzuhalten. Eine falsche Adresse dagegen verspricht eine Seite, die
+niemand findet, und das fällt erst auf, wenn der Beitrag schon steht.
+
+## Wie die Beiträge klingen sollen
+
+Je Marke liegt eine Stimmführung daneben: `marken/shortheaven3-stimme.md` und
+`marken/denkbeleg-stimme.md`. Sie halten fest, woran man merkt, dass ein Text
+von einer Maschine stammt — nicht am Inhalt, an der Gleichmäßigkeit: der
+Aphorismus ohne Ort, die immer gleiche Antithese, jeder Absatz auf eine Pointe
+zulaufend, keine einzige zugegebene Einschränkung, Sätze von ähnlicher Länge.
+
+Und was stattdessen trägt: eine Szene statt eines Begriffs, ein Gegenstand, den
+man anfassen kann, eine zugegebene Grenze, unregelmäßiger Rhythmus, am Ende eine
+Frage, deren Antwort niemand kennt.
+
+Die Probe steht am Ende der Datei: Ließe sich derselbe Text mit ausgetauschten
+Substantiven für ein Versicherungsunternehmen verwenden? Dann steht nichts drin.
 
 ## Eine neue Marke
 

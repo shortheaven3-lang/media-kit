@@ -79,3 +79,22 @@ mark { color: var(--schrift); border-bottom: 2px solid rgba(158,130,106,.5); }
 .quer .kopf { font-size: 1.375rem; margin-bottom: 1.5rem; }
 .quer .typ-haken h1, .quer h1, .quer .merksatz { font-size: 3.5rem; max-width: 90%; }
 .quer .unterzeile, .quer .abbinder { margin-top: 1.5rem; font-size: 1.625rem; }
+
+/* ---------------------------------------------------------------- Angebot
+   Mittig wie alles andere in dieser Marke. Die Adresse steht in der
+   gedaempften Farbe und in Versalien - sie soll gefunden werden, wenn jemand
+   sucht, und nicht rufen, wenn niemand sucht. */
+.typ-angebot .frage {
+  font-family: var(--schrift-titel), serif; font-weight: 500;
+  font-size: 3.5rem; line-height: 1.28; max-width: 44rem;
+}
+.typ-angebot .einladung {
+  margin-top: 2.5rem; font-size: 1.875rem; line-height: 1.5;
+  font-style: italic; color: var(--gedaempft); max-width: 36rem;
+}
+.typ-angebot .adresse {
+  margin-top: 3rem; padding-top: 1.75rem;
+  border-top: 1px solid var(--linie);
+  font-size: 1.625rem; letter-spacing: .12em;
+  text-transform: uppercase; color: var(--gedaempft);
+}

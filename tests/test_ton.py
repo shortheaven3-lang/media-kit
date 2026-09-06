@@ -104,3 +104,46 @@ def test_die_absenkung_laeuft_weich_an_und_pumpt_nicht():
 
     # Und die Absenkung setzt vor dem ersten Wort ein, nicht erst danach.
     assert musikanteil[int(0.95 * ton.SR)] < musikanteil[int(0.2 * ton.SR)]
+
+
+# --------------------------------------------------------------- Prosodie
+def test_saetze_werden_einzeln_getrennt():
+    """Piper erzeugt je Aufruf eine Sprechmelodie. Ein ganzer Absatz bekommt
+    davon nur eine - und genau das klingt nach Maschine."""
+    teile = ton.saetze_aus("Du bist nicht müde. Du bist unentschieden! Und jetzt?")
+    assert teile == ["Du bist nicht müde.", "Du bist unentschieden!", "Und jetzt?"]
+
+
+def test_leerer_text_ergibt_keine_saetze():
+    assert ton.saetze_aus("") == []
+    assert ton.saetze_aus("   \n  ") == []
+
+
+def test_nach_einer_frage_wird_laenger_geschwiegen():
+    """Eine Frage will nachhallen, ein Aussagesatz nicht."""
+    assert ton._pause_nach("Und jetzt?") > ton._pause_nach("Das war es.")
+    assert ton._pause_nach("Dazu drei Punkte:") != ton._pause_nach("Das war es.")
+
+
+def test_das_tempo_schwankt_aber_bleibt_im_rahmen():
+    tempi = [ton._tempo(s) for s in
+             ("Ein Satz.", "Noch einer.", "Und ein dritter, laenger diesmal.")]
+    assert len(set(tempi)) > 1, "gleichmaessiges Tempo klingt maschinell"
+    for t in tempi:
+        assert ton.TEMPO_GRUND * 0.9 < t < ton.TEMPO_GRUND * 1.1
+
+
+def test_das_tempo_ist_ueber_prozessgrenzen_hinweg_gleich():
+    """Nicht hash(): Pythons Zeichenketten-Hash ist je Prozess zufaellig
+    gesalzen. Derselbe Satz bekaeme dann jedes Mal ein anderes Tempo, das
+    Zwischenlager waere wertlos und zwei Renderlaeufe klaengen verschieden."""
+    import subprocess
+    import sys as _s
+    ruf = ('import sys; sys.path.insert(0, %r)\n'
+           'from media_kit import ton; print(round(ton._tempo("Ein Satz."), 9))'
+           % str(Path(__file__).resolve().parent.parent))
+    laeufe = {subprocess.run([_s.executable, "-c", ruf], capture_output=True,
+                             text=True, env={"PYTHONHASHSEED": str(n),
+                                             "PATH": "/usr/bin:/bin"}).stdout.strip()
+              for n in (0, 1, 2)}
+    assert len(laeufe) == 1, f"Tempo haengt am Zufall: {laeufe}"

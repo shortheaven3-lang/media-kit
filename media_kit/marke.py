@@ -31,6 +31,9 @@ class Marke:
     bildklima: dict = field(default_factory=dict)
     standardformate: list[str] = field(default_factory=lambda: ["karussell"])
     abbinder: str = ""
+    # {"an": true, "produkt": "selbsttest"} - ob Beitraege dieser Marke
+    # standardmaessig eine Abschluss-Slide mit Angebot bekommen.
+    angebot: dict = field(default_factory=dict)
     quelle: Path | None = None
 
     @property
@@ -74,6 +77,7 @@ def laden(name: str, ordner: Path | None = None) -> Marke:
         bildklima=daten.get("bildklima", {}),
         standardformate=daten.get("standardformate", ["karussell"]),
         abbinder=daten.get("abbinder", ""),
+        angebot=daten.get("angebot", {}),
         quelle=datei,
     )
 

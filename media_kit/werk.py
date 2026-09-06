@@ -21,6 +21,7 @@ import shutil
 from dataclasses import dataclass, field
 from pathlib import Path
 
+from . import angebot as angebot_modul
 from . import bild, formate, layout, quellen, schriften, ton, video
 from .job import Job
 from .marke import Marke, laden as marke_laden
@@ -145,7 +146,16 @@ def rendern(job: Job, *, ziel: Path, lager: Lager | None = None,
     ergebnis = Ergebnis(job=job.id)
 
     m = marke_laden(job.marke)
+    das_angebot = _angebot_anhaengen(job, m)
     schrift_css = schriften.css(m.schriftdateien, lager.wurzel, arbeit)
+
+    # Der Fingerabdruck der Vorlagen gehoert in jeden Schluessel des
+    # Zwischenlagers. Ohne ihn aendert man eine Zeile CSS, rendert neu - und
+    # bekommt kommentarlos das alte Bild zurueck, weil sich am Inhalt ja nichts
+    # geaendert hat. Genau das ist beim Bau der Angebots-Slide passiert und hat
+    # eine Weile wie ein Layoutfehler ausgesehen.
+    vorlagen = schluessel(WURZEL / "vorlagen" / "basis.css",
+                          WURZEL / "vorlagen" / f"{m.vorlage}.css")
     pruef_familien = schriften.geprueft_werden(m.schriftdateien)
 
     gewuenscht = [a for a in job.ausgaben if not nur or a in nur]
@@ -158,7 +168,8 @@ def rendern(job: Job, *, ziel: Path, lager: Lager | None = None,
     clips = None
     if videoformate and job.will_ton() and job.ton.get("stimme", True):
         saetze = [job.sprechtext(s) for s in job.slides]
-        clips = ton.sprechen(saetze, m.ton.get("stimme", "de_DE-thorsten-medium"), lager.wurzel)
+        clips = ton.sprechen(saetze, m.ton.get("stimme", "de_DE-thorsten-medium"),
+                             lager.wurzel, m.ton.get("rueckfall") or [])
     standzeiten = ton.standzeiten(clips, job.anzahl_slides, job.slidedauer())
 
     alle_nachweise: list[dict] = []
@@ -177,28 +188,59 @@ def rendern(job: Job, *, ziel: Path, lager: Lager | None = None,
             if f.ist_video:
                 ergebnis.laenge = _video_bauen(
                     job, m, f, kamera, hintergruende, standzeiten, clips,
-                    schrift_css, lager, ordner, ergebnis, erzwingen,
+                    schrift_css, lager, ordner, ergebnis, erzwingen, vorlagen,
                 )
                 ergebnis.dateien.append(ordner / f"{job.id}.mp4")
             else:
                 ergebnis.dateien += _bilder_bauen(
                     job, m, f, kamera, hintergruende, schrift_css,
-                    lager, ordner, ergebnis, erzwingen,
+                    lager, ordner, ergebnis, erzwingen, vorlagen,
                 )
         ergebnis.aufnahmen = kamera.aufnahmen
 
-    _beiwerk(job, m, ziel, alle_nachweise, ergebnis)
+    _beiwerk(job, m, ziel, alle_nachweise, ergebnis, das_angebot)
     return ergebnis
 
 
+def _angebot_anhaengen(job: Job, m: Marke):
+    """Haengt die Abschluss-Slide an - falls eine gewuenscht ist.
+
+    Sie wird hier angehaengt und nicht in der Job-Datei geschrieben, damit sie
+    nicht vergessen wird. Beim Redigieren denkt niemand an den Verweis, und ein
+    Beitrag ohne Verweis verdient nichts.
+
+    Ein Einzelbildformat bekommt sie trotzdem nicht zu sehen: dort zaehlt nur
+    die erste Slide. Das ist richtig so - eine Story ist der Verweis, sie
+    braucht keinen zweiten.
+    """
+    will, bereich = angebot_modul.gewuenscht(job, m)
+    if not will:
+        return None
+    produkt = (m.angebot or {}).get("produkt", "selbsttest")
+    try:
+        gefunden = angebot_modul.zuordnen(job, produkt=produkt, bereich=bereich)
+    except angebot_modul.AngebotFehler as fehler:
+        # Kein Grund, den ganzen Beitrag fallenzulassen: Bilder und Reel sind
+        # davon unberuehrt. Aber laut genug, dass es niemand uebersieht.
+        print(f"  Ohne Abschluss-Slide - {fehler}")
+        return None
+
+    slide = gefunden.als_slide()
+    # Vorgelesen wird die Frage, nicht die Adresse. Eine buchstabierte Adresse
+    # im Ohr ist das Gegenteil einer Einladung.
+    slide["sprich"] = " ".join(x for x in (gefunden.frage, gefunden.einladung) if x)
+    job.slides.append(slide)
+    return gefunden
+
+
 def _bilder_bauen(job, m, f, kamera, hintergruende, schrift_css,
-                  lager, ordner, ergebnis, erzwingen) -> list[Path]:
+                  lager, ordner, ergebnis, erzwingen, vorlagen) -> list[Path]:
     """Standbilder. Ein Einzelbildformat nimmt nur die erste Slide."""
     entstanden = []
     slides = job.slides if f.art == "slides" else job.slides[:1]
     for nummer, slide in enumerate(slides, start=1):
         hg = hintergruende[nummer - 1] if nummer - 1 < len(hintergruende) else None
-        marker = schluessel(slide, m.quelle, f.name, "voll", str(hg or ""),
+        marker = schluessel(slide, m.quelle, vorlagen, f.name, "voll", str(hg or ""),
                             job.rubrik, m.anzeigename)
         name = (f.dateiname(job.id, nummer if f.art == "slides" else None))
         endgueltig = ordner / name
@@ -224,11 +266,11 @@ def _bilder_bauen(job, m, f, kamera, hintergruende, schrift_css,
 
 
 def _video_bauen(job, m, f, kamera, hintergruende, standzeiten, clips,
-                 schrift_css, lager, ordner, ergebnis, erzwingen) -> float:
+                 schrift_css, lager, ordner, ergebnis, erzwingen, vorlagen) -> float:
     einstellungen = []
     for nummer, slide in enumerate(job.slides, start=1):
         hg = hintergruende[nummer - 1] if nummer - 1 < len(hintergruende) else None
-        grund = schluessel(slide, m.quelle, f.name, str(hg or ""), job.rubrik)
+        grund = schluessel(slide, m.quelle, vorlagen, f.name, str(hg or ""), job.rubrik)
 
         def hintergrund_bauen(pfad, slide=slide, nummer=nummer, hg=hg):
             kamera.aufnehmen(
@@ -306,11 +348,18 @@ def _relativ(pfad: Path | None, arbeit: Path) -> str | None:
 
 
 def _beiwerk(job: Job, m: Marke, ziel: Path, nachweise: list[dict],
-             ergebnis: Ergebnis) -> None:
+             ergebnis: Ergebnis, das_angebot=None) -> None:
     """Bildunterschrift und Lizenznachweis neben die Medien legen."""
     ziel.mkdir(parents=True, exist_ok=True)
-    if job.caption:
-        (ziel / "caption.txt").write_text(job.caption.rstrip() + "\n", encoding="utf-8")
+    text = job.caption.rstrip() if job.caption else ""
+    if das_angebot:
+        # Im Feed ist kein Verweis anklickbar; in der Bildunterschrift steht er
+        # trotzdem, weil er von dort kopiert werden kann und in der Profilzeile
+        # nur eine Adresse Platz hat.
+        text = (text + "\n\n" if text else "") + (
+            f"{das_angebot.frage}\n{das_angebot.einladung}\n{das_angebot.adresse}")
+    if text:
+        (ziel / "caption.txt").write_text(text + "\n", encoding="utf-8")
         ergebnis.dateien.append(ziel / "caption.txt")
 
     nachweis = {
@@ -323,6 +372,7 @@ def _beiwerk(job: Job, m: Marke, ziel: Path, nachweise: list[dict],
                    "lizenz": m.ton.get("stimme_lizenz", "")} if job.will_ton() else None,
         "musik": "im Programm erzeugt, keine fremden Rechte" if job.will_ton() else None,
         "bilder": nachweise,
+        "angebot": das_angebot.als_nachweis() if das_angebot else None,
     }
     (ziel / "nachweis.json").write_text(
         json.dumps({k: v for k, v in nachweis.items() if v not in (None, [], "")},

@@ -83,7 +83,13 @@ jobs:
           if [ "$NEU" = "true" ]; then argumente="$argumente --neu"; fi
           python3 -m media_kit.cli rendern $argumente
 
+      # Zurueckgeschrieben wird nur auf dem Hauptzweig. Sonst sammelt jeder
+      # Zweig seine eigenen "Medien gerendert"-Commits, main und der Zweig
+      # laufen auseinander, und beim Zusammenfuehren stehen sich zwei Saetze
+      # gerenderter Binaerdateien gegenueber. Genau das ist hier passiert.
+      # Auf anderen Zweigen bleibt das Artefakt - zum Ansehen reicht das.
       - name: Ergebnis committen
+        if: github.ref_name == github.event.repository.default_branch
         env:
           ZWEIG: ${{ github.ref_name }}
         run: |
@@ -117,6 +123,8 @@ jobs:
           echo "Push auch nach drei Versuchen nicht durchgekommen." >&2
           exit 1
 
+      # Auf Nebenzweigen ist das Artefakt der einzige Weg an die Ergebnisse -
+      # deshalb laeuft dieser Schritt immer, auch nach einem Fehlschlag.
       - name: Ergebnisse auch als Artefakt
         if: always()
         uses: actions/upload-artifact@v4

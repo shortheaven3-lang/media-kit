@@ -18,9 +18,9 @@
   "schriftdateien": ["Archivo", "Inter", "JetBrainsMono"],
   "abbinder": "@denkbeleg",
   "angebot": {
-    "an": true,
+    "an": false,
     "produkt": "selbsttest",
-    "_warum": "Ein Beitrag ohne Verweis verdient nichts. Der Verweis geht auf den Selbsttest, nicht auf die Verkaufsseite: er redet ueber den Leser statt ueber das Produkt und kostet nichts. Einzelne Beitraege koennen ihn mit \"angebot\": false abschalten - nicht jeder Text vertraegt einen."
+    "_warum": "Aus fuer diese Marke. denkbeleg widerlegt Behauptungen; ihre Glaubwuerdigkeit liegt darin, dass sie nichts zu verkaufen hat. Ein Beitrag, der eine Gewohnheitszahl widerlegt und darunter ein 30-Tage-Programm anbietet, nimmt sich genau das. Dazu kam die Zuordnung sachlich daneben: der Beitrag fragt, welchen Zahlen man ungeprueft glaubt, die Werbung fragt nach Aufschieben - formal ueber \"gewohnheit, durchhalt\" getroffen, inhaltlich nicht dasselbe Thema. Ein einzelner Beitrag kann den Verweis mit \"angebot\": true doch anfordern, wenn er ihn wirklich traegt."
   },
   "standardformate": ["karussell"],
 

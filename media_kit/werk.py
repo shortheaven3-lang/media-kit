@@ -38,6 +38,7 @@ class Ergebnis:
     aufnahmen: int = 0
     aus_lager: int = 0
     laenge: float = 0.0
+    hinweise: list[str] = field(default_factory=list)
 
     def bericht(self) -> str:
         zeilen = [f"{self.job}: {len(self.dateien)} Datei(en)"]
@@ -52,6 +53,10 @@ class Ergebnis:
         zeilen.append(f"    {self.aufnahmen} Aufnahme(n){gespart}")
         if self.laenge:
             zeilen.append(f"    Videolaenge {self.laenge:.1f} s")
+        # Weggeraeumtes gehoert in den Bericht: eine still geloeschte Datei
+        # sieht im Nachhinein wie ein Fehler des Renderers aus.
+        for hinweis in self.hinweise:
+            zeilen.append(f"    {hinweis}")
         return "\n".join(zeilen)
 
 
@@ -190,12 +195,14 @@ def rendern(job: Job, *, ziel: Path, lager: Lager | None = None,
                     job, m, f, kamera, hintergruende, standzeiten, clips,
                     schrift_css, lager, ordner, ergebnis, erzwingen, vorlagen,
                 )
-                ergebnis.dateien.append(ordner / f"{job.id}.mp4")
+                gebaut = [ordner / f"{job.id}.mp4"]
             else:
-                ergebnis.dateien += _bilder_bauen(
+                gebaut = _bilder_bauen(
                     job, m, f, kamera, hintergruende, schrift_css,
                     lager, ordner, ergebnis, erzwingen, vorlagen,
                 )
+            ergebnis.dateien += gebaut
+            _altlasten_raeumen(ordner, gebaut, ergebnis)
         ergebnis.aufnahmen = kamera.aufnahmen
 
     _beiwerk(job, m, ziel, alle_nachweise, ergebnis, das_angebot)
@@ -345,6 +352,23 @@ def _relativ(pfad: Path | None, arbeit: Path) -> str | None:
     if not ziel.exists() or ziel.stat().st_size != pfad.stat().st_size:
         shutil.copyfile(pfad, ziel)
     return f"bilder/{pfad.name}"
+
+
+def _altlasten_raeumen(ordner: Path, gebaut: list[Path], ergebnis: Ergebnis) -> None:
+    """Dateien wegraeumen, die dieser Lauf nicht mehr erzeugt hat.
+
+    Der Ausgabeordner wird nur angelegt, nie geleert. Schrumpft ein Karussell -
+    weil eine Slide entfaellt oder die Marke keine Angebots-Slide mehr anhaengt -
+    bleibt die hoechste Nummer als Leiche liegen. Sie sieht aus wie ein
+    gueltiges Bild, wird mit eingecheckt und landet beim Hochladen mit im Beitrag.
+    Genau das ist beim Abschalten der Werbung fuer denkbeleg passiert.
+    """
+    behalten = {p.resolve() for p in gebaut}
+    for vorhanden in sorted(ordner.iterdir()):
+        if not vorhanden.is_file() or vorhanden.resolve() in behalten:
+            continue
+        vorhanden.unlink()
+        ergebnis.hinweise.append(f"{ordner.name}/{vorhanden.name} entfernt (kein Teil dieses Laufs)")
 
 
 def _beiwerk(job: Job, m: Marke, ziel: Path, nachweise: list[dict],

@@ -181,6 +181,13 @@ Steuerung je Beitrag:
 | `"grenzen"` | anhängen, diesen Bereich nehmen |
 | `false` | keins — nicht jeder Text verträgt einen Verweis |
 
+Je Marke steht der Schalter unter `angebot.an`. Bei **@shortheaven3** ist er an,
+bei **@denkbeleg** aus: diese Marke widerlegt Behauptungen, und ihre
+Glaubwürdigkeit liegt gerade darin, dass sie nichts zu verkaufen hat. Ein
+Beitrag, der eine Gewohnheitszahl widerlegt und darunter ein 30-Tage-Programm
+anbietet, nimmt sich genau das. Ein einzelner Beitrag kann den Verweis mit
+`"angebot": true` trotzdem anfordern, wenn er ihn wirklich trägt.
+
 **Die Schlagworte sind Wortstämme, keine Vollformen.** Deutsche trennbare Verben
 zerfallen im Satz: „aufschieben“ steht als „schiebst es auf“ da und wird von der
 Vollform nie gefunden. Bei zusammengesetzten Wendungen reicht auch der Stamm
